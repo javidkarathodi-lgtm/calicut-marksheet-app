@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>University of Calicut - Interactive Mark Sheet</title>
-    <!-- html2pdf.js for direct A4 PDF export named [QP_CODE]_[DATE].pdf -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- jsPDF for 100% reliable, cutoff-free side-by-side A4 PDF generation on mobile & desktop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -32,7 +32,7 @@
             color: #f8fafc;
             padding: 10px 14px;
             border-radius: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -50,11 +50,13 @@
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-between;
         }
 
         .btn {
             border: none;
-            padding: 8px 14px;
+            padding: 9px 16px;
             font-size: 13px;
             font-weight: 700;
             border-radius: 6px;
@@ -66,6 +68,7 @@
             transition: opacity 0.15s, transform 0.1s;
             white-space: nowrap;
             font-family: inherit;
+            flex: 1;
         }
 
         .btn:hover {
@@ -96,25 +99,6 @@
             color: #ffffff;
         }
 
-        .toggle-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            user-select: none;
-            font-weight: 600;
-            font-size: 12.5px;
-            color: #e2e8f0;
-        }
-
-        .toggle-label input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #3b82f6;
-            margin: 0;
-        }
-
         /* Mobile View Switcher Bar */
         .mobile-mode-bar {
             display: flex;
@@ -130,7 +114,7 @@
         .mode-tab {
             flex: 1;
             text-align: center;
-            padding: 7px 10px;
+            padding: 8px 10px;
             font-size: 12.5px;
             font-weight: 700;
             color: #cbd5e1;
@@ -184,12 +168,12 @@
             overflow: hidden;
         }
 
-        /* Exact A4 Portrait Page (794px x 1122px at 96 DPI = 210mm x 297mm) */
+        /* Exact A4 Portrait Page (794px x 1123px at 96 DPI = 210mm x 297mm) */
         .a4-page {
             background: #ffffff;
             width: 794px;
             min-width: 794px;
-            height: 1122px;
+            height: 1123px;
             padding: 24px 26px;
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
             display: grid;
@@ -221,7 +205,7 @@
             color: #000000;
         }
 
-        /* Top Row: QP CODE on Left, ORIGINAL/DUPLICATE on Right */
+        /* Top Row: QP CODE on Left, ORIGINAL / DUPLICATE on Right */
         .top-meta-row {
             display: flex;
             justify-content: space-between;
@@ -262,7 +246,7 @@
         }
 
         .sheet-badge {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 700;
             letter-spacing: 0.4px;
             color: #000000;
@@ -368,15 +352,15 @@
         }
 
         .col-reg {
-            width: 39%;
+            width: 38%;
         }
 
         .col-fig {
-            width: 16%;
+            width: 20%;
         }
 
         .col-words {
-            width: 45%;
+            width: 42%;
         }
 
         /* Seamless Borderless Inputs inside Table Cells */
@@ -540,7 +524,7 @@
             cursor: pointer;
         }
 
-        /* Easy Entry Zoom Mode (Single Sheet Full Width for Comfortable Typing) */
+        /* Easy Entry Zoom Mode (Single Sheet Full Width for Comfortable Mobile Typing) */
         body.mobile-entry-mode .mobile-sheet-tabs {
             display: flex;
         }
@@ -581,39 +565,6 @@
 
         body.mobile-entry-mode .words-input {
             font-size: 11.5px;
-        }
-
-        /* Static Text Spans Used Inside Off-Screen PDF Clone */
-        .pdf-static-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #000000;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .pdf-static-line {
-            display: inline-block;
-            border-bottom: 1px solid #000000;
-            min-height: 15px;
-            padding: 0 3px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11.5px;
-            color: #000000;
-            vertical-align: baseline;
-        }
-
-        .pdf-static-sig {
-            display: inline-block;
-            width: 100%;
-            min-height: 16px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
-            color: #000000;
         }
 
         /* Clear Confirmation Modal */
@@ -671,13 +622,7 @@
                 gap: 8px;
             }
 
-            .control-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-
             .btn {
-                flex: 1;
                 padding: 9px 8px;
                 font-size: 12px;
             }
@@ -745,7 +690,7 @@
 </head>
 <body>
 
-    <!-- Top Toolbar (Only Download PDF, Print A4, Clear All, and Sync Toggle) -->
+    <!-- Top Toolbar (Download PDF, Print A4, Clear All) -->
     <div class="control-bar no-print">
         <div class="control-group">
             <button type="button" class="btn btn-download" id="downloadPdfBtn" onclick="downloadPDFFile()">
@@ -757,13 +702,6 @@
             <button type="button" class="btn btn-clear" onclick="openClearModal()">
                 🗑️ Clear All
             </button>
-        </div>
-
-        <div class="control-group">
-            <label class="toggle-label" title="Automatically mirror everything typed in the left Original sheet onto the right Duplicate sheet">
-                <input type="checkbox" id="syncToggle" checked>
-                Auto-Sync ORIGINAL ➔ DUPLICATE
-            </label>
         </div>
     </div>
 
@@ -777,13 +715,13 @@
         </button>
     </div>
 
-    <!-- Sheet Selector (Visible when in Easy Entry Zoom Mode) -->
+    <!-- Sheet Selector (Visible only when in Easy Entry Zoom Mode) -->
     <div class="mobile-sheet-tabs no-print" id="mobileSheetTabs">
         <button type="button" class="sheet-tab-btn active" id="btnSheet1" onclick="selectMobileSheet(1)">
-            1. ORIGINAL Sheet (Edit Here)
+            ORIGINAL
         </button>
         <button type="button" class="sheet-tab-btn" id="btnSheet2" onclick="selectMobileSheet(2)">
-            2. DUPLICATE Sheet
+            DUPLICATE
         </button>
     </div>
 
@@ -841,7 +779,7 @@
             return words.join(' ');
         }
 
-        // Build the HTML for a single Mark Sheet column
+        // Build the HTML for a single Mark Sheet column (1 = ORIGINAL, 2 = DUPLICATE)
         function createMarkSheetHTML(sheetIndex) {
             let rowsHTML = '';
             for (let r = 0; r < TOTAL_ROWS; r++) {
@@ -983,10 +921,8 @@
         a4Container.innerHTML = createMarkSheetHTML(1) + createMarkSheetHTML(2);
         document.getElementById('sheet-1').classList.add('mobile-active-sheet');
 
-        const syncToggle = document.getElementById('syncToggle');
-
-        // Mirror all fields from Sheet 1 (Original) to Sheet 2 (Duplicate)
-        function syncAllFromSheet1ToSheet2() {
+        // Silently mirror all fields from Sheet 1 (ORIGINAL) to Sheet 2 (DUPLICATE)
+        function syncAllFromOriginalToDuplicate() {
             const sheet1Fields = document.querySelectorAll('[data-sheet="1"]');
             sheet1Fields.forEach(el1 => {
                 const field = el1.getAttribute('data-field');
@@ -997,7 +933,7 @@
             });
         }
 
-        // Live input handler (Converts Figures -> Words per student row; leaves TOTAL row untouched)
+        // Live input handler: converts Figures -> Words per student row; leaves TOTAL row untouched
         function handleFieldChange(e) {
             const target = e.target;
             if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT') return;
@@ -1006,7 +942,7 @@
             const row = target.getAttribute('data-row');
             const col = target.getAttribute('data-col');
 
-            // Only convert student rows (0 to 24); do not auto-sum or fill TOTAL row (row 25)
+            // Convert student rows (0 to 24); do not auto-sum or fill TOTAL row (row 25)
             if (col === 'fig' && row !== null && parseInt(row, 10) < TOTAL_ROWS) {
                 const wordsEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="words-${row}"]`);
                 if (wordsEl) {
@@ -1014,8 +950,9 @@
                 }
             }
 
-            if (sheetIndex === '1' && syncToggle.checked) {
-                syncAllFromSheet1ToSheet2();
+            // Whenever ORIGINAL is edited, silently mirror to DUPLICATE
+            if (sheetIndex === '1') {
+                syncAllFromOriginalToDuplicate();
             }
         }
 
@@ -1049,12 +986,6 @@
             }
         });
 
-        syncToggle.addEventListener('change', () => {
-            if (syncToggle.checked) {
-                syncAllFromSheet1ToSheet2();
-            }
-        });
-
         // Build dynamic filename from QP CODE + DATE -> [QP_CODE]_[DATE]
         function getDynamicFileName() {
             const qpInput = document.querySelector('input[data-sheet="1"][data-field="qp-code"]');
@@ -1069,6 +1000,12 @@
             return `${cleanQp}_${cleanDate}`;
         }
 
+        // Helper to read a field value from sheet 1 or sheet 2
+        function getSheetVal(sheetIndex, fieldName) {
+            const el = document.querySelector(`[data-sheet="${sheetIndex}"][data-field="${fieldName}"]`);
+            return el ? el.value.trim() : '';
+        }
+
         // Print A4 Page
         function printMarkSheet() {
             const originalTitle = document.title;
@@ -1079,111 +1016,372 @@
             }, 1000);
         }
 
-        // Off-screen 794px A4 Clone PDF Exporter (Guarantees right side is never clipped on mobile or desktop)
+        /*
+         * Direct High-Resolution A4 Canvas + jsPDF Renderer
+         * Completely immune to CSS scale(), mobile screen width, or scroll offsets.
+         * Always draws BOTH ORIGINAL (left) and DUPLICATE (right) side-by-side on 1 A4 page.
+         */
+        function renderSingleSheetOnCanvas(ctx, sheetIndex, originX, originY, colW) {
+            ctx.fillStyle = '#000000';
+            ctx.strokeStyle = '#000000';
+
+            let y = originY;
+
+            // 1. Top Row: QP CODE on left, ORIGINAL / DUPLICATE on right
+            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('QP CODE :', originX, y + 12);
+
+            const qpLineStart = originX + 64;
+            const qpLineEnd = originX + 185;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(qpLineStart, y + 14);
+            ctx.lineTo(qpLineEnd, y + 14);
+            ctx.stroke();
+
+            const qpVal = getSheetVal(sheetIndex, 'qp-code');
+            if (qpVal) {
+                ctx.fillText(qpVal, qpLineStart + 3, y + 12);
+            }
+
+            const badgeText = sheetIndex === 1 ? 'ORIGINAL' : 'DUPLICATE';
+            ctx.textAlign = 'right';
+            ctx.fillText(badgeText, originX + colW, y + 12);
+
+            y += 26;
+
+            // 2. Centered Header: UNIVERSITY OF CALICUT / MARK SHEET
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 15.5px Arial, Helvetica, sans-serif';
+            ctx.fillText('UNIVERSITY OF CALICUT', originX + colW / 2, y + 10);
+
+            y += 20;
+            ctx.font = 'bold 14.5px Arial, Helvetica, sans-serif';
+            ctx.fillText('MARK SHEET', originX + colW / 2, y + 8);
+
+            y += 22;
+
+            // 3. Examinations Line: __________Examinations_____20___
+            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+
+            const examLabel = 'Examinations';
+            const examLabelW = ctx.measureText(examLabel).width;
+            const yearPrefix = '20';
+            const yearPrefixW = ctx.measureText(yearPrefix).width;
+
+            const yearLineW = 26;
+            const midLineW = 48;
+            const prefixLineW = colW - examLabelW - midLineW - yearPrefixW - yearLineW - 4;
+
+            let curX = originX;
+            // Prefix line before Examinations
+            ctx.beginPath();
+            ctx.moveTo(curX, y + 12);
+            ctx.lineTo(curX + prefixLineW, y + 12);
+            ctx.stroke();
+
+            const examNameVal = getSheetVal(sheetIndex, 'exam-name');
+            if (examNameVal) {
+                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(examNameVal, curX + prefixLineW / 2, y + 10);
+            }
+
+            curX += prefixLineW + 1;
+            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(examLabel, curX, y + 11);
+            curX += examLabelW + 1;
+
+            // Middle line between Examinations and 20
+            ctx.beginPath();
+            ctx.moveTo(curX, y + 12);
+            ctx.lineTo(curX + midLineW, y + 12);
+            ctx.stroke();
+
+            const examSessionVal = getSheetVal(sheetIndex, 'exam-session');
+            if (examSessionVal) {
+                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(examSessionVal, curX + midLineW / 2, y + 10);
+            }
+
+            curX += midLineW + 1;
+            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(yearPrefix, curX, y + 11);
+            curX += yearPrefixW + 1;
+
+            // Year suffix line after 20
+            ctx.beginPath();
+            ctx.moveTo(curX, y + 12);
+            ctx.lineTo(originX + colW, y + 12);
+            ctx.stroke();
+
+            const examYearVal = getSheetVal(sheetIndex, 'exam-year');
+            if (examYearVal) {
+                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(examYearVal, curX + 2, y + 10);
+            }
+
+            y += 20;
+
+            // 4. Course Line: Course__________________________
+            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            const courseLabel = 'Course';
+            ctx.fillText(courseLabel, originX, y + 11);
+            const courseLabelW = ctx.measureText(courseLabel).width;
+
+            ctx.beginPath();
+            ctx.moveTo(originX + courseLabelW + 2, y + 12);
+            ctx.lineTo(originX + colW, y + 12);
+            ctx.stroke();
+
+            const courseVal = getSheetVal(sheetIndex, 'course');
+            if (courseVal) {
+                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.fillText(courseVal, originX + courseLabelW + 6, y + 10);
+            }
+
+            y += 18;
+
+            // 5. Main Table (2 Header Rows + 25 Student Rows + 1 TOTAL Row)
+            const tableTop = y;
+            const regColW = Math.round(colW * 0.38);
+            const figColW = Math.round(colW * 0.20);
+            const wordsColW = colW - regColW - figColW;
+
+            const headerRowH = 22;
+            const dataRowH = 26.5;
+            const totalRowsCount = TOTAL_ROWS + 1; // 25 student rows + 1 TOTAL row
+            const tableH = (headerRowH * 2) + (dataRowH * totalRowsCount);
+
+            // Outer Table Border
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(originX, tableTop, colW, tableH);
+
+            // Vertical Column Dividers
+            ctx.lineWidth = 1;
+            // Between Register Number and Figures
+            ctx.beginPath();
+            ctx.moveTo(originX + regColW, tableTop);
+            ctx.lineTo(originX + regColW, tableTop + tableH);
+            ctx.stroke();
+
+            // Between Figures and in words (starts from header row 2)
+            ctx.beginPath();
+            ctx.moveTo(originX + regColW + figColW, tableTop + headerRowH);
+            ctx.lineTo(originX + regColW + figColW, tableTop + tableH);
+            ctx.stroke();
+
+            // Horizontal divider between Marks and Figures/in words
+            ctx.beginPath();
+            ctx.moveTo(originX + regColW, tableTop + headerRowH);
+            ctx.lineTo(originX + colW, tableTop + headerRowH);
+            ctx.stroke();
+
+            // Horizontal divider below Header Row 2
+            ctx.beginPath();
+            ctx.moveTo(originX, tableTop + headerRowH * 2);
+            ctx.lineTo(originX + colW, tableTop + headerRowH * 2);
+            ctx.stroke();
+
+            // Header Texts
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Register Number', originX + regColW / 2, tableTop + headerRowH);
+            ctx.fillText('Marks', originX + regColW + (figColW + wordsColW) / 2, tableTop + headerRowH / 2);
+            ctx.fillText('Figures', originX + regColW + figColW / 2, tableTop + headerRowH + headerRowH / 2);
+            ctx.fillText('in words', originX + regColW + figColW + wordsColW / 2, tableTop + headerRowH + headerRowH / 2);
+
+            // 25 Student Rows + 1 TOTAL Row
+            let rowY = tableTop + headerRowH * 2;
+            for (let r = 0; r < TOTAL_ROWS; r++) {
+                // Row bottom line
+                ctx.beginPath();
+                ctx.moveTo(originX, rowY + dataRowH);
+                ctx.lineTo(originX + colW, rowY + dataRowH);
+                ctx.stroke();
+
+                const regVal = getSheetVal(sheetIndex, `reg-${r}`).toUpperCase();
+                const figVal = getSheetVal(sheetIndex, `fig-${r}`).toUpperCase();
+                const wordsVal = getSheetVal(sheetIndex, `words-${r}`).toUpperCase();
+
+                const centerY = rowY + dataRowH / 2 + 0.5;
+
+                if (regVal) {
+                    ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(regVal, originX + regColW / 2, centerY);
+                }
+                if (figVal) {
+                    ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(figVal, originX + regColW + figColW / 2, centerY);
+                }
+                if (wordsVal) {
+                    ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(wordsVal, originX + regColW + figColW + wordsColW / 2, centerY);
+                }
+
+                rowY += dataRowH;
+            }
+
+            // TOTAL Row
+            const totalCenterY = rowY + dataRowH / 2 + 0.5;
+            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('TOTAL', originX + 5, totalCenterY);
+
+            const totalFigVal = getSheetVal(sheetIndex, 'total-fig').toUpperCase();
+            const totalWordsVal = getSheetVal(sheetIndex, 'total-words').toUpperCase();
+            if (totalFigVal) {
+                ctx.textAlign = 'center';
+                ctx.fillText(totalFigVal, originX + regColW + figColW / 2, totalCenterY);
+            }
+            if (totalWordsVal) {
+                ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(totalWordsVal, originX + regColW + figColW + wordsColW / 2, totalCenterY);
+            }
+
+            y = tableTop + tableH + 16;
+
+            // 6. Bottom Signature Block
+            ctx.textBaseline = 'alphabetic';
+            const labelColW = Math.round(colW * 0.31);
+            const colonColW = Math.round(colW * 0.04);
+            const nameColW = Math.round(colW * 0.35);
+            const signColW = colW - labelColW - colonColW - nameColW;
+
+            // Underlined Name and Signature headers
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'center';
+            const nameHeaderX = originX + labelColW + colonColW + nameColW / 2;
+            const signHeaderX = originX + labelColW + colonColW + nameColW + signColW / 2;
+
+            ctx.fillText('Name', nameHeaderX, y);
+            const nameW = ctx.measureText('Name').width;
+            ctx.beginPath();
+            ctx.moveTo(nameHeaderX - nameW / 2, y + 2);
+            ctx.lineTo(nameHeaderX + nameW / 2, y + 2);
+            ctx.stroke();
+
+            ctx.fillText('Signature', signHeaderX, y);
+            const signW = ctx.measureText('Signature').width;
+            ctx.beginPath();
+            ctx.moveTo(signHeaderX - signW / 2, y + 2);
+            ctx.lineTo(signHeaderX + signW / 2, y + 2);
+            ctx.stroke();
+
+            const sigRows = [
+                { label: 'Addl. Examiner', field: 'addl-examiner' },
+                { label: 'Chief Examiner', field: 'chief-examiner' },
+                { label: 'Chairman', field: 'chairman' }
+            ];
+
+            sigRows.forEach(item => {
+                y += 22;
+                ctx.font = 'italic bold 11.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(item.label, originX, y);
+
+                ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(':', originX + labelColW + colonColW / 2, y);
+
+                const val = getSheetVal(sheetIndex, item.field);
+                if (val) {
+                    ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(val, originX + labelColW + colonColW + 4, y);
+                }
+            });
+
+            // Date & Session Row
+            y += 22;
+            ctx.font = 'italic bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('Date', originX, y);
+
+            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(':', originX + labelColW + colonColW / 2, y);
+
+            const dateVal = getSheetVal(sheetIndex, 'date');
+            if (dateVal) {
+                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(dateVal, originX + labelColW + colonColW + 4, y);
+            }
+
+            const sessionVal = getSheetVal(sheetIndex, 'session-fn-an') || 'FN / AN';
+            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(`SESSION : ${sessionVal}`, originX + colW, y);
+        }
+
+        // Export High-Resolution Side-by-Side A4 PDF ([QPCODE]_[DATE].pdf)
         function downloadPDFFile() {
             const btn = document.getElementById('downloadPdfBtn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Generating PDF...';
             btn.disabled = true;
 
-            const fileName = `${getDynamicFileName()}.pdf`;
+            try {
+                // Ensure Duplicate has latest Original values
+                syncAllFromOriginalToDuplicate();
 
-            // Create an off-screen 794px x 1122px wrapper
-            const offscreenHost = document.createElement('div');
-            offscreenHost.style.position = 'fixed';
-            offscreenHost.style.top = '0';
-            offscreenHost.style.left = '-9999px';
-            offscreenHost.style.width = '794px';
-            offscreenHost.style.height = '1122px';
-            offscreenHost.style.background = '#ffffff';
-            offscreenHost.style.zIndex = '-1';
+                // Create 3x Scale High-DPI A4 Canvas (794x1123 logical px -> 2382x3369 actual px)
+                const scaleFactor = 3;
+                const logicalW = 794;
+                const logicalH = 1123;
 
-            const clonePage = a4Container.cloneNode(true);
-            clonePage.style.transform = 'none';
-            clonePage.style.width = '794px';
-            clonePage.style.minWidth = '794px';
-            clonePage.style.height = '1122px';
-            clonePage.style.padding = '24px 26px';
-            clonePage.style.boxShadow = 'none';
-            clonePage.style.display = 'grid';
-            clonePage.style.gridTemplateColumns = '1fr 1fr';
-            clonePage.style.columnGap = '28px';
+                const canvas = document.createElement('canvas');
+                canvas.width = logicalW * scaleFactor;
+                canvas.height = logicalH * scaleFactor;
 
-            // Ensure both mark sheets are visible in the clone even if mobile was in 1-by-1 mode
-            const cloneSheets = clonePage.querySelectorAll('.marksheet');
-            cloneSheets.forEach(s => {
-                s.style.display = 'flex';
-            });
+                const ctx = canvas.getContext('2d');
+                ctx.scale(scaleFactor, scaleFactor);
 
-            // Replace inputs and selects in the clone with crisp static spans so html2canvas renders zero input borders
-            const liveInputs = a4Container.querySelectorAll('input, select');
-            const cloneInputs = clonePage.querySelectorAll('input, select');
+                // White A4 Page Background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, logicalW, logicalH);
 
-            cloneInputs.forEach((cEl, idx) => {
-                const lEl = liveInputs[idx];
-                const val = lEl ? lEl.value : '';
-                const span = document.createElement('span');
+                // Page Padding & 2-Column Geometry
+                const padX = 26;
+                const padY = 24;
+                const colGap = 28;
+                const colW = (logicalW - (padX * 2) - colGap) / 2; // 357px per column
 
-                if (cEl.classList.contains('cell-input')) {
-                    span.className = 'pdf-static-text';
-                    span.style.fontWeight = cEl.classList.contains('words-input') ? '600' : '700';
-                    span.style.fontSize = cEl.classList.contains('words-input') ? '10.5px' : '11.5px';
-                    if (cEl.classList.contains('reg-input') || cEl.classList.contains('fig-input') || cEl.classList.contains('words-input')) {
-                        span.style.textTransform = 'uppercase';
-                    }
-                    span.textContent = val;
-                } else if (cEl.classList.contains('line-input') || cEl.classList.contains('qp-input')) {
-                    span.className = 'pdf-static-line';
-                    span.style.width = cEl.offsetWidth ? `${cEl.offsetWidth}px` : '90px';
-                    if (cEl.classList.contains('exam-prefix-input') || cEl.classList.contains('course-input')) {
-                        span.style.flex = '1';
-                    }
-                    span.textContent = val;
-                } else {
-                    span.className = 'pdf-static-sig';
-                    span.textContent = val;
-                }
+                // Draw Left Column (ORIGINAL) and Right Column (DUPLICATE)
+                renderSingleSheetOnCanvas(ctx, 1, padX, padY, colW);
+                renderSingleSheetOnCanvas(ctx, 2, padX + colW + colGap, padY, colW);
 
-                cEl.parentNode.replaceChild(span, cEl);
-            });
-
-            offscreenHost.appendChild(clonePage);
-            document.body.appendChild(offscreenHost);
-
-            const opt = {
-                margin: 0,
-                filename: fileName,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    width: 794,
-                    height: 1122,
-                    windowWidth: 794,
-                    windowHeight: 1122,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF: {
-                    unit: 'px',
-                    format: [794, 1122],
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
                     orientation: 'portrait',
-                    hotfixes: ['px_scaling']
-                }
-            };
+                    unit: 'mm',
+                    format: 'a4'
+                });
 
-            html2pdf().set(opt).from(clonePage).save().then(() => {
-                document.body.removeChild(offscreenHost);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }).catch(() => {
-                if ( document.body.contains(offscreenHost) ) {
-                    document.body.removeChild(offscreenHost);
-                }
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+                pdf.save(`${getDynamicFileName()}.pdf`);
+            } catch (err) {
+                console.error('PDF export error:', err);
                 printMarkSheet();
-            });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // Responsive Mobile Scaling: Default is 'preview' (Fit Full A4 Side-by-Side to Screen)
@@ -1241,7 +1439,7 @@
             if (availableWidth < a4PixelWidth) {
                 const scale = availableWidth / a4PixelWidth;
                 a4Container.style.transform = `scale(${scale})`;
-                viewport.style.height = `${Math.ceil(1122 * scale) + 12}px`;
+                viewport.style.height = `${Math.ceil(1123 * scale) + 12}px`;
             } else {
                 a4Container.style.transform = 'none';
                 viewport.style.height = 'auto';
