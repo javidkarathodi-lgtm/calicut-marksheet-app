@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University of Calicut - Interactive Mark Sheet</title>
+    <!-- html2pdf.js for direct A4 PDF export named [QP_CODE]_[DATE].pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -13,23 +15,24 @@
             font-family: Arial, Helvetica, sans-serif;
             background-color: #cbd5e1;
             margin: 0;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: #000;
+            min-height: 100vh;
         }
 
         /* Top Control Bar (Hidden in Print) */
         .control-bar {
             background: #1e293b;
             color: #f8fafc;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             display: flex;
             flex-wrap: wrap;
-            gap: 14px;
+            gap: 10px;
             align-items: center;
             justify-content: space-between;
             width: 210mm;
@@ -41,21 +44,23 @@
         .control-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .btn {
             border: none;
-            padding: 8px 14px;
+            padding: 8px 13px;
             font-size: 13px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
         }
 
         .btn:hover {
@@ -81,6 +86,63 @@
             color: #ffffff;
         }
 
+        /* Mobile View Switcher Bar (Shown on screens < 820px) */
+        .mobile-mode-bar {
+            display: none;
+            width: 100%;
+            max-width: 210mm;
+            background: #334155;
+            padding: 6px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            gap: 6px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 12.5px;
+            font-weight: bold;
+            color: #cbd5e1;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .mode-tab.active {
+            background: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Sheet Switcher inside Mobile Entry Mode */
+        .mobile-sheet-tabs {
+            display: none;
+            width: 100%;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .sheet-tab-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1.5px solid #475569;
+            background: #e2e8f0;
+            color: #1e293b;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .sheet-tab-btn.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
         .toggle-label {
             display: inline-flex;
             align-items: center;
@@ -91,10 +153,19 @@
         }
 
         .toggle-label input[type="checkbox"] {
-            width: 15px;
-            height: 15px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
             accent-color: #3b82f6;
+        }
+
+        /* Viewport Wrapper for Smooth A4 Scaling on Mobile */
+        .page-viewport {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
         }
 
         /* A4 Page Layout - Side by Side 2 Columns */
@@ -109,6 +180,35 @@
             column-gap: 8mm;
             align-items: start;
             position: relative;
+            transform-origin: top center;
+        }
+
+        /* Force strict A4 dimensions when exporting PDF via html2pdf */
+        .a4-page.pdf-exporting {
+            transform: none !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 7mm 7mm !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            column-gap: 8mm !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+        }
+
+        .a4-page.pdf-exporting .marksheet {
+            display: flex !important;
+        }
+
+        .a4-page.pdf-exporting::after {
+            display: none !important;
+        }
+
+        .a4-page.pdf-exporting .session-select {
+            border: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
         }
 
         /* Subtle center cut/fold guide on screen only */
@@ -129,408 +229,80 @@
             position: relative;
         }
 
-        /* Top Bar: QP CODE on left, ORIGINAL / DUPLICATE badge on right */
-        .top-meta-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 4px;
-            gap: 6px;
-        }
-
-        .qp-box {
-            display: flex;
-            align-items: baseline;
-            font-size: 11.5px;
-            font-weight: bold;
-            white-space: nowrap;
-            flex: 1;
-        }
-
-        .qp-input {
-            border: none;
-            border-bottom: 1px solid #000;
-            outline: none;
-            font-family: inherit;
-            font-size: 11.5px;
-            font-weight: bold;
-            padding: 0 4px 1px 4px;
-            width: 110px;
-            text-transform: uppercase;
-            background: transparent;
-            color: #000;
-        }
-
-        .qp-input:focus {
-            background-color: #f0f9ff;
-        }
-
-        .sheet-badge {
-            font-size: 10.5px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            border: 1.2px solid #000;
-            padding: 1px 6px;
-            text-transform: uppercase;
-            background: #fff;
-            color: #000;
-        }
-
-        /* Header Section */
-        .header {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 6px;
-            line-height: 1.22;
-        }
-
-        .header h2 {
-            margin: 0;
-            font-size: 13.5px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        .header h3 {
-            margin: 2px 0 0 0;
-            font-size: 13px;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        /* Exam & Course Underlined Rows */
-        .meta-line {
-            display: flex;
-            align-items: flex-end;
-            font-size: 11.5px;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        .line-input {
-            border: none;
-            border-bottom: 1px solid #000;
-            outline: none;
-            font-family: inherit;
-            font-size: 11.5px;
-            font-weight: bold;
-            padding: 0 3px 1px 3px;
-            background: transparent;
-            color: #000;
-            min-width: 0;
-        }
-
-        .line-input:focus {
-            background-color: #f0f9ff;
-        }
-
-        .exam-prefix-input {
-            flex: 1;
-            text-align: center;
-        }
-
-        .exam-mid-input {
-            width: 46px;
-            text-align: center;
-        }
-
-        .exam-year-input {
-            width: 24px;
-            text-align: left;
-        }
-
-        .course-input {
-            flex: 1;
-            margin-left: 3px;
-        }
-
-        /* Main Marks Table */
-        table.main-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1.5px solid #000;
-            table-layout: fixed;
-            margin-top: 2px;
-        }
-
-        table.main-table th,
-        table.main-table td {
-            border: 1px solid #000;
-            padding: 0;
-            height: 21.8px;
-            font-size: 11.5px;
-            vertical-align: middle;
-        }
-
-        table.main-table thead th {
-            height: 19.5px;
-            font-weight: normal;
-            text-align: center;
-            padding: 1px 2px;
-        }
-
-        table.main-table thead th.bold-th {
-            font-weight: bold;
-        }
-
-        .col-reg {
-            width: 38%;
-        }
-
-        .col-fig {
-            width: 19%;
-        }
-
-        .col-words {
-            width: 43%;
-        }
-
-        .cell-input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: 11.5px;
-            padding: 0 4px;
-            color: #000;
-            display: block;
-        }
-
-        .cell-input:focus {
-            background-color: #e0f2fe;
-        }
-
-        .reg-input {
-            text-align: left;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
-
-        .fig-input {
-            text-align: center;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .words-input {
-            text-align: center;
-            font-size: 10.2px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .total-label {
-            font-weight: bold;
-            text-align: left;
-            padding-left: 5px !important;
-            font-size: 11.5px;
-        }
-
-        /* Signature Section at Bottom */
-        .sig-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 6px;
-            table-layout: fixed;
-        }
-
-        .sig-table td {
-            padding: 3.5px 0;
-            font-size: 11.5px;
-            vertical-align: bottom;
-        }
-
-        .sig-header-cell {
-            text-align: center;
-            text-decoration: underline;
-            padding-bottom: 5px !important;
-            font-size: 11.5px;
-        }
-
-        .sig-label {
-            font-weight: bold;
-            font-style: italic;
-            width: 33%;
-            white-space: nowrap;
-        }
-
-        .sig-colon {
-            width: 4%;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .sig-name-col {
-            width: 35%;
-            padding-right: 4px !important;
-        }
-
-        .sig-sign-col {
-            width: 28%;
-        }
-
-        .sig-input {
-            width: 100%;
-            border: none;
-            border-bottom: 1px dotted transparent;
-            outline: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 1px 2px;
-            color: #000;
-        }
-
-        .sig-input:focus {
-            background-color: #f0f9ff;
-            border-bottom: 1px dotted #64748b;
-        }
-
-        /* Session FN / AN Inline Selector inside Date Row */
-        .date-session-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 4px;
-            width: 100%;
-        }
-
-        .date-input {
-            width: 82px;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 1px 2px;
-            color: #000;
-        }
-
-        .date-input:focus {
-            background-color: #f0f9ff;
-        }
-
-        .session-box {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            font-size: 10.5px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .session-select {
-            border: 1px solid #000;
-            background: transparent;
-            font-family: inherit;
-            font-size: 10.5px;
-            font-weight: bold;
-            padding: 0 2px;
-            color: #000;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* Confirmation Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-box {
-            background: #fff;
-            padding: 20px 24px;
-            border-radius: 8px;
-            max-width: 360px;
-            width: 90%;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            text-align: center;
-        }
-
-        .modal-box h4 {
-            margin: 0 0 8px 0;
-            font-size: 16px;
-        }
-
-        .modal-box p {
-            margin: 0 0 18px 0;
-            font-size: 13px;
-            color: #475569;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn-cancel {
-            background: #e2e8f0;
-            color: #1e293b;
-        }
-
-        /* Print Media Query */
-        @media print {
-            @page {
-                size: A4 portrait;
-                margin: 0;
-            }
-
+        /* Mobile Entry Mode Styles (Easy touch typing without tiny zoom) */
+        @media screen and (max-width: 820px) {
             body {
-                background: #ffffff;
-                padding: 0;
-                margin: 0;
+                padding: 8px;
             }
 
-            .no-print {
-                display: none !important;
+            .control-bar {
+                padding: 10px;
+                gap: 8px;
             }
 
-            .a4-page {
-                box-shadow: none;
-                width: 210mm;
-                height: 297mm;
-                padding: 7mm 7mm;
-                margin: 0;
+            .control-group {
+                width: 100%;
+                justify-content: space-between;
             }
 
-            .a4-page::after {
+            .btn {
+                flex: 1;
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .mobile-mode-bar {
+                display: flex;
+            }
+
+            /* Mode 1: Easy Mobile Entry View (Single Column Full Width) */
+            body.mobile-entry-mode .mobile-sheet-tabs {
+                display: flex;
+            }
+
+            body.mobile-entry-mode .a4-page {
+                width: 100%;
+                height: auto;
+                min-height: auto;
+                padding: 12px;
+                display: block;
+                transform: none !important;
+                margin-bottom: 20px;
+                border-radius: 8px;
+            }
+
+            body.mobile-entry-mode .a4-page::after {
                 display: none;
             }
 
-            .cell-input:focus,
-            .line-input:focus,
-            .sig-input:focus,
-            .qp-input:focus,
-            .date-input:focus {
-                background-color: transparent !important;
+            body.mobile-entry-mode .marksheet {
+                display: none;
             }
 
-            .session-select {
-                border: none;
-                appearance: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                padding: 0;
+            body.mobile-entry-mode .marksheet.mobile-active-sheet {
+                display: flex;
             }
 
-            input::placeholder {
-                color: transparent !important;
+            body.mobile-entry-mode table.main-table th,
+            body.mobile-entry-mode table.main-table td {
+                height: 34px;
+                font-size: 13px;
+            }
+
+            body.mobile-entry-mode .cell-input {
+                font-size: 14px;
+                padding: 0 6px;
+            }
+
+            body.mobile-entry-mode .words-input {
+                font-size: 11.5px;
+            }
+
+            body.mobile-entry-mode .line-input,
+            body.mobile-entry-mode .qp-input,
+            body.mobile-entry-mode .sig-input,
+            body.mobile-entry-mode .date-input {
+                font-size: 13px;
             }
         }
     </style>
@@ -540,14 +312,14 @@
     <!-- Top Interactive Controls -->
     <div class="control-bar no-print">
         <div class="control-group">
-            <button type="button" class="btn btn-print" onclick="window.print()">
-                🖨️ Print Mark Sheet (A4)
+            <button type="button" class="btn btn-download" id="downloadPdfBtn" onclick="downloadPDFFile()">
+                📄 Download PDF
             </button>
-            <button type="button" class="btn btn-download" onclick="downloadHTMLFile()">
-                ⬇️ Download index.html (For GitHub)
+            <button type="button" class="btn btn-print" onclick="printMarkSheet()">
+                🖨️ Print (A4)
             </button>
             <button type="button" class="btn btn-clear" onclick="openClearModal()">
-                🗑️ Clear All
+                🗑️ Clear
             </button>
         </div>
 
@@ -559,9 +331,32 @@
         </div>
     </div>
 
-    <!-- Single A4 Page with Two Side-by-Side Mark Sheets -->
-    <div class="a4-page" id="a4Container">
-        <!-- Both Left (ORIGINAL) and Right (DUPLICATE) Mark Sheets are rendered here by JS -->
+    <!-- Mobile Mode Switcher (Visible on Smartphones/Tablets) -->
+    <div class="mobile-mode-bar no-print">
+        <button type="button" class="mode-tab active" id="tabEntryMode" onclick="setMobileViewMode('entry')">
+            📱 Mobile Easy Entry
+        </button>
+        <button type="button" class="mode-tab" id="tabPreviewMode" onclick="setMobileViewMode('preview')">
+            📄 Full A4 Preview (2-in-1)
+        </button>
+    </div>
+
+    <!-- Mobile Sheet Selector (When in Mobile Easy Entry Mode) -->
+    <div class="mobile-sheet-tabs no-print" id="mobileSheetTabs">
+        <button type="button" class="sheet-tab-btn active" id="btnSheet1" onclick="selectMobileSheet(1)">
+            1. ORIGINAL Sheet (Edit Here)
+        </button>
+        <button type="button" class="sheet-tab-btn" id="btnSheet2" onclick="selectMobileSheet(2)">
+            2. DUPLICATE Sheet
+        </button>
+    </div>
+
+    <!-- Responsive Viewport Wrapper -->
+    <div class="page-viewport" id="pageViewport">
+        <!-- Single A4 Page with Two Side-by-Side Mark Sheets -->
+        <div class="a4-page" id="a4Container">
+            <!-- Both Left (ORIGINAL) and Right (DUPLICATE) Mark Sheets are rendered here by JS -->
+        </div>
     </div>
 
     <!-- Custom Clear Confirmation Modal -->
@@ -751,38 +546,10 @@
         const a4Container = document.getElementById('a4Container');
         a4Container.innerHTML = createMarkSheetHTML(1) + createMarkSheetHTML(2);
 
+        // Mark Sheet 1 as default active sheet for mobile view
+        document.getElementById('sheet-1').classList.add('mobile-active-sheet');
+
         const syncToggle = document.getElementById('syncToggle');
-
-        // Recalculate Total marks for a given sheet
-        function updateSheetTotal(sheetIndex) {
-            let sum = 0;
-            let hasNumericMarks = false;
-
-            for (let r = 0; r < TOTAL_ROWS; r++) {
-                const figEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="fig-${r}"]`);
-                if (figEl && figEl.value.trim() !== '') {
-                    const num = parseFloat(figEl.value.trim());
-                    if (!isNaN(num)) {
-                        sum += num;
-                        hasNumericMarks = true;
-                    }
-                }
-            }
-
-            const totalFigEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="total-fig"]`);
-            const totalWordsEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="total-words"]`);
-
-            if (totalFigEl && totalWordsEl) {
-                if (hasNumericMarks) {
-                    const formattedSum = Number.isInteger(sum) ? String(sum) : sum.toFixed(2).replace(/\.?0+$/, '');
-                    totalFigEl.value = formattedSum;
-                    totalWordsEl.value = figuresToWords(formattedSum);
-                } else {
-                    totalFigEl.value = '';
-                    totalWordsEl.value = '';
-                }
-            }
-        }
 
         // Copy all fields (inputs and selects) from Sheet 1 (Original) to Sheet 2 (Duplicate)
         function syncAllFromSheet1ToSheet2() {
@@ -796,7 +563,7 @@
             });
         }
 
-        // Handle live input and select events
+        // Handle live input and select events (NO automatic TOTAL summation)
         function handleFieldChange(e) {
             const target = e.target;
             if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT') return;
@@ -806,20 +573,12 @@
             const row = target.getAttribute('data-row');
             const col = target.getAttribute('data-col');
 
-            // If user typed in a row's Figures box, auto-fill "in words" and update TOTAL
+            // If user typed in a student row's Figures box, only auto-fill that row's "in words"
+            // TOTAL row is intentionally left untouched (no auto sum)
             if (col === 'fig' && row !== null && parseInt(row, 10) < TOTAL_ROWS) {
                 const wordsEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="words-${row}"]`);
                 if (wordsEl) {
                     wordsEl.value = figuresToWords(target.value);
-                }
-                updateSheetTotal(sheetIndex);
-            }
-
-            // If user manually edits TOTAL Figures box, update TOTAL in words
-            if (field === 'total-fig') {
-                const totalWordsEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="total-words"]`);
-                if (totalWordsEl) {
-                    totalWordsEl.value = figuresToWords(target.value);
                 }
             }
 
@@ -866,19 +625,147 @@
             }
         });
 
-        // One-Click Download index.html for GitHub upload
-        function downloadHTMLFile() {
-            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'index.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        // Build dynamic filename from QP CODE + DATE -> [QP_CODE]_[DATE].pdf
+        function getDynamicFileName() {
+            const qpInput = document.querySelector('input[data-sheet="1"][data-field="qp-code"]');
+            const dateInput = document.querySelector('input[data-sheet="1"][data-field="date"]');
+
+            const rawQp = (qpInput && qpInput.value.trim()) ? qpInput.value.trim() : 'QPCODE';
+            const rawDate = (dateInput && dateInput.value.trim()) ? dateInput.value.trim() : 'DATE';
+
+            const cleanQp = rawQp.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const cleanDate = rawDate.replace(/[^a-zA-Z0-9_-]/g, '-');
+
+            return `${cleanQp}_${cleanDate}`;
         }
+
+        // Print with dynamic document title so browser Save-as-PDF uses [QP_CODE]_[DATE].pdf
+        function printMarkSheet() {
+            const originalTitle = document.title;
+            document.title = getDynamicFileName();
+            window.print();
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }
+
+        // Direct A4 PDF Download named [QP_CODE]_[DATE].pdf
+        function downloadPDFFile() {
+            const btn = document.getElementById('downloadPdfBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generating PDF...';
+            btn.disabled = true;
+
+            const fileName = `${getDynamicFileName()}.pdf`;
+            const wasMobileEntry = document.body.classList.contains('mobile-entry-mode');
+
+            // Temporarily switch to strict A4 side-by-side layout for accurate capture
+            document.body.classList.remove('mobile-entry-mode');
+            a4Container.classList.add('pdf-exporting');
+            document.getElementById('pageViewport').style.height = 'auto';
+
+            const opt = {
+                margin: 0,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            html2pdf().set(opt).from(a4Container).save().then(() => {
+                a4Container.classList.remove('pdf-exporting');
+                if (wasMobileEntry) {
+                    document.body.classList.add('mobile-entry-mode');
+                }
+                applyMobileScaling();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(() => {
+                a4Container.classList.remove('pdf-exporting');
+                if (wasMobileEntry) {
+                    document.body.classList.add('mobile-entry-mode');
+                }
+                applyMobileScaling();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                printMarkSheet();
+            });
+        }
+
+        // Mobile View Mode & Responsive Auto-Scaling Logic
+        let currentMobileMode = 'entry'; // 'entry' or 'preview'
+
+        function setMobileViewMode(mode) {
+            currentMobileMode = mode;
+            const tabEntry = document.getElementById('tabEntryMode');
+            const tabPreview = document.getElementById('tabPreviewMode');
+
+            if (mode === 'entry') {
+                document.body.classList.add('mobile-entry-mode');
+                tabEntry.classList.add('active');
+                tabPreview.classList.remove('active');
+            } else {
+                document.body.classList.remove('mobile-entry-mode');
+                tabEntry.classList.remove('active');
+                tabPreview.classList.add('active');
+            }
+            applyMobileScaling();
+        }
+
+        function selectMobileSheet(sheetNum) {
+            const s1 = document.getElementById('sheet-1');
+            const s2 = document.getElementById('sheet-2');
+            const b1 = document.getElementById('btnSheet1');
+            const b2 = document.getElementById('btnSheet2');
+
+            if (sheetNum === 1) {
+                s1.classList.add('mobile-active-sheet');
+                s2.classList.remove('mobile-active-sheet');
+                b1.classList.add('active');
+                b2.classList.remove('active');
+            } else {
+                s1.classList.remove('mobile-active-sheet');
+                s2.classList.add('mobile-active-sheet');
+                b1.classList.remove('active');
+                b2.classList.add('active');
+            }
+        }
+
+        // Scales the 210mm A4 sheet smoothly to fit mobile screens when in Preview mode
+        function applyMobileScaling() {
+            const viewport = document.getElementById('pageViewport');
+            if (window.innerWidth <= 820) {
+                if (currentMobileMode === 'entry') {
+                    document.body.classList.add('mobile-entry-mode');
+                    a4Container.style.transform = 'none';
+                    viewport.style.height = 'auto';
+                } else {
+                    document.body.classList.remove('mobile-entry-mode');
+                    const availableWidth = window.innerWidth - 16;
+                    const a4PixelWidth = 794; // 210mm at 96 DPI
+                    const scale = Math.min(1, availableWidth / a4PixelWidth);
+                    a4Container.style.transform = `scale(${scale})`;
+                    viewport.style.height = `${1123 * scale + 20}px`;
+                }
+            } else {
+                document.body.classList.remove('mobile-entry-mode');
+                a4Container.style.transform = 'none';
+                viewport.style.height = 'auto';
+            }
+        }
+
+        window.addEventListener('resize', applyMobileScaling);
+        window.addEventListener('DOMContentLoaded', applyMobileScaling);
+        applyMobileScaling();
 
         // Modal functions for Clear All
         function openClearModal() {
