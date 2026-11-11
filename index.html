@@ -24,12 +24,12 @@
         .control-bar {
             background: #1e293b;
             color: #f8fafc;
-            padding: 12px 20px;
+            padding: 12px 18px;
             border-radius: 8px;
             margin-bottom: 16px;
             display: flex;
             flex-wrap: wrap;
-            gap: 18px;
+            gap: 14px;
             align-items: center;
             justify-content: space-between;
             width: 210mm;
@@ -41,13 +41,13 @@
         .control-group {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .btn {
             border: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             font-size: 13px;
             font-weight: bold;
             border-radius: 6px;
@@ -55,15 +55,24 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: opacity 0.15s;
+            transition: opacity 0.15s, transform 0.1s;
         }
 
         .btn:hover {
             opacity: 0.92;
         }
 
+        .btn:active {
+            transform: scale(0.98);
+        }
+
         .btn-print {
             background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-download {
+            background-color: #059669;
             color: #ffffff;
         }
 
@@ -93,7 +102,7 @@
             background: #ffffff;
             width: 210mm;
             height: 297mm;
-            padding: 8mm 7mm;
+            padding: 7mm 7mm;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -106,8 +115,8 @@
         .a4-page::after {
             content: "";
             position: absolute;
-            top: 6mm;
-            bottom: 6mm;
+            top: 5mm;
+            bottom: 5mm;
             left: 50%;
             border-left: 1px dashed #cbd5e1;
             pointer-events: none;
@@ -120,28 +129,59 @@
             position: relative;
         }
 
-        .duplicate-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            border: 1px solid #000;
-            padding: 1px 5px;
-            display: none;
+        /* Top Bar: QP CODE on left, ORIGINAL / DUPLICATE badge on right */
+        .top-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            gap: 6px;
         }
 
-        .duplicate-badge.visible {
-            display: inline-block;
+        .qp-box {
+            display: flex;
+            align-items: baseline;
+            font-size: 11.5px;
+            font-weight: bold;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .qp-input {
+            border: none;
+            border-bottom: 1px solid #000;
+            outline: none;
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: bold;
+            padding: 0 4px 1px 4px;
+            width: 110px;
+            text-transform: uppercase;
+            background: transparent;
+            color: #000;
+        }
+
+        .qp-input:focus {
+            background-color: #f0f9ff;
+        }
+
+        .sheet-badge {
+            font-size: 10.5px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border: 1.2px solid #000;
+            padding: 1px 6px;
+            text-transform: uppercase;
+            background: #fff;
+            color: #000;
         }
 
         /* Header Section */
         .header {
             text-align: center;
             font-weight: bold;
-            margin-bottom: 8px;
-            line-height: 1.25;
+            margin-bottom: 6px;
+            line-height: 1.22;
         }
 
         .header h2 {
@@ -152,7 +192,7 @@
         }
 
         .header h3 {
-            margin: 3px 0 0 0;
+            margin: 2px 0 0 0;
             font-size: 13px;
             letter-spacing: 0.3px;
             text-transform: uppercase;
@@ -163,7 +203,7 @@
             display: flex;
             align-items: flex-end;
             font-size: 11.5px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             white-space: nowrap;
             width: 100%;
         }
@@ -191,7 +231,7 @@
         }
 
         .exam-mid-input {
-            width: 48px;
+            width: 46px;
             text-align: center;
         }
 
@@ -202,7 +242,7 @@
 
         .course-input {
             flex: 1;
-            margin-left: 2px;
+            margin-left: 3px;
         }
 
         /* Main Marks Table */
@@ -218,13 +258,13 @@
         table.main-table td {
             border: 1px solid #000;
             padding: 0;
-            height: 22.5px;
+            height: 21.8px;
             font-size: 11.5px;
             vertical-align: middle;
         }
 
         table.main-table thead th {
-            height: 20px;
+            height: 19.5px;
             font-weight: normal;
             text-align: center;
             padding: 1px 2px;
@@ -235,7 +275,7 @@
         }
 
         .col-reg {
-            width: 37%;
+            width: 38%;
         }
 
         .col-fig {
@@ -243,7 +283,7 @@
         }
 
         .col-words {
-            width: 44%;
+            width: 43%;
         }
 
         .cell-input {
@@ -278,7 +318,7 @@
 
         .words-input {
             text-align: center;
-            font-size: 10.5px;
+            font-size: 10.2px;
             font-weight: 600;
             text-transform: uppercase;
         }
@@ -294,12 +334,12 @@
         .sig-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 8px;
+            margin-top: 6px;
             table-layout: fixed;
         }
 
         .sig-table td {
-            padding: 4px 0;
+            padding: 3.5px 0;
             font-size: 11.5px;
             vertical-align: bottom;
         }
@@ -307,35 +347,36 @@
         .sig-header-cell {
             text-align: center;
             text-decoration: underline;
-            padding-bottom: 6px !important;
+            padding-bottom: 5px !important;
             font-size: 11.5px;
         }
 
         .sig-label {
             font-weight: bold;
             font-style: italic;
-            width: 34%;
+            width: 33%;
             white-space: nowrap;
         }
 
         .sig-colon {
-            width: 5%;
+            width: 4%;
             font-weight: bold;
             text-align: center;
         }
 
         .sig-name-col {
-            width: 36%;
-            padding-right: 6px !important;
+            width: 35%;
+            padding-right: 4px !important;
         }
 
         .sig-sign-col {
-            width: 25%;
+            width: 28%;
         }
 
         .sig-input {
             width: 100%;
             border: none;
+            border-bottom: 1px dotted transparent;
             outline: none;
             background: transparent;
             font-family: inherit;
@@ -347,6 +388,53 @@
 
         .sig-input:focus {
             background-color: #f0f9ff;
+            border-bottom: 1px dotted #64748b;
+        }
+
+        /* Session FN / AN Inline Selector inside Date Row */
+        .date-session-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .date-input {
+            width: 82px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 2px;
+            color: #000;
+        }
+
+        .date-input:focus {
+            background-color: #f0f9ff;
+        }
+
+        .session-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10.5px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .session-select {
+            border: 1px solid #000;
+            background: transparent;
+            font-family: inherit;
+            font-size: 10.5px;
+            font-weight: bold;
+            padding: 0 2px;
+            color: #000;
+            outline: none;
+            cursor: pointer;
         }
 
         /* Confirmation Modal */
@@ -417,7 +505,7 @@
                 box-shadow: none;
                 width: 210mm;
                 height: 297mm;
-                padding: 8mm 7mm;
+                padding: 7mm 7mm;
                 margin: 0;
             }
 
@@ -427,8 +515,18 @@
 
             .cell-input:focus,
             .line-input:focus,
-            .sig-input:focus {
+            .sig-input:focus,
+            .qp-input:focus,
+            .date-input:focus {
                 background-color: transparent !important;
+            }
+
+            .session-select {
+                border: none;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                padding: 0;
             }
 
             input::placeholder {
@@ -445,33 +543,32 @@
             <button type="button" class="btn btn-print" onclick="window.print()">
                 🖨️ Print Mark Sheet (A4)
             </button>
+            <button type="button" class="btn btn-download" onclick="downloadHTMLFile()">
+                ⬇️ Download index.html (For GitHub)
+            </button>
             <button type="button" class="btn btn-clear" onclick="openClearModal()">
                 🗑️ Clear All
             </button>
         </div>
 
         <div class="control-group">
-            <label class="toggle-label" title="Automatically mirror everything typed in the left sheet onto the right duplicate sheet">
+            <label class="toggle-label" title="Automatically mirror everything typed in the left Original sheet onto the right Duplicate sheet">
                 <input type="checkbox" id="syncToggle" checked>
-                Auto-Sync 1st Sheet (Original) ➔ 2nd Sheet (Duplicate)
-            </label>
-            <label class="toggle-label" title="Show or hide DUPLICATE text on the 2nd mark sheet">
-                <input type="checkbox" id="dupBadgeToggle">
-                Show "DUPLICATE" label on 2nd Sheet
+                Auto-Sync ORIGINAL ➔ DUPLICATE
             </label>
         </div>
     </div>
 
     <!-- Single A4 Page with Two Side-by-Side Mark Sheets -->
     <div class="a4-page" id="a4Container">
-        <!-- Both Left (Sheet 1) and Right (Sheet 2) Mark Sheets are rendered here by JS -->
+        <!-- Both Left (ORIGINAL) and Right (DUPLICATE) Mark Sheets are rendered here by JS -->
     </div>
 
     <!-- Custom Clear Confirmation Modal -->
     <div class="modal-overlay no-print" id="clearModal">
         <div class="modal-box">
             <h4>Clear All Entries?</h4>
-            <p>This will erase all Register Numbers, Marks, and Examiner details from both mark sheets.</p>
+            <p>This will erase all QP Code, Register Numbers, Marks, and Examiner details from both mark sheets.</p>
             <div class="modal-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeClearModal()">Cancel</button>
                 <button type="button" class="btn btn-clear" onclick="confirmClearAll()">Yes, Clear</button>
@@ -538,13 +635,18 @@
                 `;
             }
 
-            const duplicateBadgeHTML = sheetIndex === 2
-                ? `<span class="duplicate-badge" id="dupBadge">DUPLICATE</span>`
-                : '';
+            const badgeLabel = sheetIndex === 1 ? 'ORIGINAL' : 'DUPLICATE';
 
             return `
                 <div class="marksheet" id="sheet-${sheetIndex}">
-                    ${duplicateBadgeHTML}
+                    <div class="top-meta-row">
+                        <div class="qp-box">
+                            <span>QP CODE :</span>
+                            <input type="text" class="qp-input" data-sheet="${sheetIndex}" data-field="qp-code" autocomplete="off" spellcheck="false">
+                        </div>
+                        <span class="sheet-badge">${badgeLabel}</span>
+                    </div>
+
                     <div class="header">
                         <h2>UNIVERSITY OF CALICUT</h2>
                         <h3>MARK SHEET</h3>
@@ -627,7 +729,17 @@
                             <td class="sig-label">Date</td>
                             <td class="sig-colon">:</td>
                             <td colspan="2">
-                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="date" autocomplete="off">
+                                <div class="date-session-wrapper">
+                                    <input type="text" class="date-input" data-sheet="${sheetIndex}" data-field="date" autocomplete="off">
+                                    <div class="session-box">
+                                        <span>SESSION :</span>
+                                        <select class="session-select" data-sheet="${sheetIndex}" data-field="session-fn-an">
+                                            <option value="FN / AN">FN / AN</option>
+                                            <option value="FN">FN</option>
+                                            <option value="AN">AN</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -640,7 +752,6 @@
         a4Container.innerHTML = createMarkSheetHTML(1) + createMarkSheetHTML(2);
 
         const syncToggle = document.getElementById('syncToggle');
-        const dupBadgeToggle = document.getElementById('dupBadgeToggle');
 
         // Recalculate Total marks for a given sheet
         function updateSheetTotal(sheetIndex) {
@@ -673,22 +784,22 @@
             }
         }
 
-        // Copy all fields from Sheet 1 (Original) to Sheet 2 (Duplicate)
+        // Copy all fields (inputs and selects) from Sheet 1 (Original) to Sheet 2 (Duplicate)
         function syncAllFromSheet1ToSheet2() {
-            const sheet1Inputs = document.querySelectorAll('input[data-sheet="1"]');
-            sheet1Inputs.forEach(input1 => {
-                const field = input1.getAttribute('data-field');
-                const input2 = document.querySelector(`input[data-sheet="2"][data-field="${field}"]`);
-                if (input2) {
-                    input2.value = input1.value;
+            const sheet1Fields = document.querySelectorAll('[data-sheet="1"]');
+            sheet1Fields.forEach(el1 => {
+                const field = el1.getAttribute('data-field');
+                const el2 = document.querySelector(`[data-sheet="2"][data-field="${field}"]`);
+                if (el2) {
+                    el2.value = el1.value;
                 }
             });
         }
 
-        // Handle live input events
-        a4Container.addEventListener('input', (e) => {
+        // Handle live input and select events
+        function handleFieldChange(e) {
             const target = e.target;
-            if (target.tagName !== 'INPUT') return;
+            if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT') return;
 
             const sheetIndex = target.getAttribute('data-sheet');
             const field = target.getAttribute('data-field');
@@ -716,7 +827,10 @@
             if (sheetIndex === '1' && syncToggle.checked) {
                 syncAllFromSheet1ToSheet2();
             }
-        });
+        }
+
+        a4Container.addEventListener('input', handleFieldChange);
+        a4Container.addEventListener('change', handleFieldChange);
 
         // Keyboard navigation (Enter / Arrow keys move smoothly across rows & columns)
         a4Container.addEventListener('keydown', (e) => {
@@ -752,13 +866,19 @@
             }
         });
 
-        // Toggle DUPLICATE badge on 2nd sheet
-        dupBadgeToggle.addEventListener('change', () => {
-            const badge = document.getElementById('dupBadge');
-            if (badge) {
-                badge.classList.toggle('visible', dupBadgeToggle.checked);
-            }
-        });
+        // One-Click Download index.html for GitHub upload
+        function downloadHTMLFile() {
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
 
         // Modal functions for Clear All
         function openClearModal() {
@@ -772,6 +892,8 @@
         function confirmClearAll() {
             const allInputs = a4Container.querySelectorAll('input');
             allInputs.forEach(inp => { inp.value = ''; });
+            const allSelects = a4Container.querySelectorAll('select');
+            allSelects.forEach(sel => { sel.selectedIndex = 0; });
             closeClearModal();
         }
     </script>
