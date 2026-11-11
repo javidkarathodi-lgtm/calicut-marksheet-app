@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>University of Calicut - Interactive Mark Sheet</title>
     <!-- html2pdf.js for direct A4 PDF export named [QP_CODE]_[DATE].pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body {
@@ -19,15 +21,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #000;
+            color: #000000;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* Top Control Bar (Hidden in Print) */
         .control-bar {
-            background: #1e293b;
+            background: #0f172a;
             color: #f8fafc;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 10px;
             margin-bottom: 12px;
             display: flex;
@@ -35,10 +38,11 @@
             gap: 10px;
             align-items: center;
             justify-content: space-between;
-            width: 210mm;
+            width: 794px;
             max-width: 100%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
             font-size: 13px;
+            z-index: 20;
         }
 
         .control-group {
@@ -50,9 +54,9 @@
 
         .btn {
             border: none;
-            padding: 8px 13px;
+            padding: 8px 14px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 700;
             border-radius: 6px;
             cursor: pointer;
             display: inline-flex;
@@ -61,6 +65,7 @@
             gap: 6px;
             transition: opacity 0.15s, transform 0.1s;
             white-space: nowrap;
+            font-family: inherit;
         }
 
         .btn:hover {
@@ -71,13 +76,13 @@
             transform: scale(0.98);
         }
 
-        .btn-print {
-            background-color: #2563eb;
+        .btn-download {
+            background-color: #059669;
             color: #ffffff;
         }
 
-        .btn-download {
-            background-color: #059669;
+        .btn-print {
+            background-color: #2563eb;
             color: #ffffff;
         }
 
@@ -86,61 +91,9 @@
             color: #ffffff;
         }
 
-        /* Mobile View Switcher Bar (Shown on screens < 820px) */
-        .mobile-mode-bar {
-            display: none;
-            width: 100%;
-            max-width: 210mm;
-            background: #334155;
-            padding: 6px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            gap: 6px;
-        }
-
-        .mode-tab {
-            flex: 1;
-            text-align: center;
-            padding: 8px 10px;
-            font-size: 12.5px;
-            font-weight: bold;
-            color: #cbd5e1;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .mode-tab.active {
-            background: #3b82f6;
+        .btn-cancel {
+            background-color: #64748b;
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Sheet Switcher inside Mobile Entry Mode */
-        .mobile-sheet-tabs {
-            display: none;
-            width: 100%;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .sheet-tab-btn {
-            flex: 1;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border: 1.5px solid #475569;
-            background: #e2e8f0;
-            color: #1e293b;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .sheet-tab-btn.active {
-            background: #0f172a;
-            color: #ffffff;
-            border-color: #0f172a;
         }
 
         .toggle-label {
@@ -149,7 +102,9 @@
             gap: 6px;
             cursor: pointer;
             user-select: none;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 12.5px;
+            color: #e2e8f0;
         }
 
         .toggle-label input[type="checkbox"] {
@@ -157,6 +112,67 @@
             height: 16px;
             cursor: pointer;
             accent-color: #3b82f6;
+            margin: 0;
+        }
+
+        /* Mobile View Switcher Bar */
+        .mobile-mode-bar {
+            display: flex;
+            width: 794px;
+            max-width: 100%;
+            background: #1e293b;
+            padding: 5px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            gap: 6px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            text-align: center;
+            padding: 7px 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #cbd5e1;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .mode-tab.active {
+            background: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Sheet Switcher inside Easy Entry Zoom Mode */
+        .mobile-sheet-tabs {
+            display: none;
+            width: 794px;
+            max-width: 100%;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .sheet-tab-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border: 1.5px solid #475569;
+            background: #e2e8f0;
+            color: #1e293b;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .sheet-tab-btn.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
         }
 
         /* Viewport Wrapper for Smooth A4 Scaling on Mobile */
@@ -165,71 +181,486 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* A4 Page Layout - Side by Side 2 Columns */
+        /* Exact A4 Portrait Page (794px x 1122px at 96 DPI = 210mm x 297mm) */
         .a4-page {
             background: #ffffff;
-            width: 210mm;
-            height: 297mm;
-            padding: 7mm 7mm;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            width: 794px;
+            min-width: 794px;
+            height: 1122px;
+            padding: 24px 26px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: 8mm;
+            column-gap: 28px;
             align-items: start;
             position: relative;
             transform-origin: top center;
+            color: #000000;
         }
 
-        /* Force strict A4 dimensions when exporting PDF via html2pdf */
-        .a4-page.pdf-exporting {
-            transform: none !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            padding: 7mm 7mm !important;
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            column-gap: 8mm !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-        }
-
-        .a4-page.pdf-exporting .marksheet {
-            display: flex !important;
-        }
-
-        .a4-page.pdf-exporting::after {
-            display: none !important;
-        }
-
-        .a4-page.pdf-exporting .session-select {
-            border: none !important;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            -moz-appearance: none !important;
-        }
-
-        /* Subtle center cut/fold guide on screen only */
+        /* Subtle center guide line on screen only */
         .a4-page::after {
             content: "";
             position: absolute;
-            top: 5mm;
-            bottom: 5mm;
+            top: 16px;
+            bottom: 16px;
             left: 50%;
             border-left: 1px dashed #cbd5e1;
             pointer-events: none;
         }
 
+        /* Individual Mark Sheet Column */
         .marksheet {
             width: 100%;
             display: flex;
             flex-direction: column;
             position: relative;
+            color: #000000;
         }
 
-        /* Mobile Entry Mode Styles (Easy touch typing without tiny zoom) */
+        /* Top Row: QP CODE on Left, ORIGINAL/DUPLICATE on Right */
+        .top-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .qp-box {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .qp-label {
+            color: #000000;
+            font-weight: 700;
+            font-size: 11.5px;
+        }
+
+        .qp-input {
+            border: none;
+            border-bottom: 1px solid #000000;
+            outline: none;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+            width: 115px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #000000;
+            padding: 0 2px;
+            height: 16px;
+        }
+
+        .sheet-badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: #000000;
+            text-transform: uppercase;
+        }
+
+        /* Centered University Header */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+            line-height: 1.25;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 15.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .header h3 {
+            margin: 3px 0 0 0;
+            font-size: 14.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        /* Single-Line Examinations & Course Rows */
+        .meta-line {
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            white-space: nowrap;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #000000;
+        }
+
+        .line-input {
+            border: none;
+            border-bottom: 1px solid #000000;
+            outline: none;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11.5px;
+            color: #000000;
+            padding: 0 3px;
+            height: 16px;
+            min-width: 0;
+        }
+
+        .exam-prefix-input {
+            flex: 1;
+            text-align: center;
+        }
+
+        .exam-mid-input {
+            width: 48px;
+            text-align: center;
+        }
+
+        .exam-year-input {
+            width: 26px;
+            text-align: left;
+        }
+
+        .course-input {
+            flex: 1;
+            margin-left: 2px;
+        }
+
+        /* Main Marks Table - Strict Connected Black Grid */
+        table.main-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000000;
+            table-layout: fixed;
+            margin-top: 2px;
+            margin-bottom: 6px;
+        }
+
+        table.main-table th,
+        table.main-table td {
+            border: 1px solid #000000;
+            padding: 0;
+            margin: 0;
+            height: 26.5px;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 11.5px;
+            color: #000000;
+        }
+
+        table.main-table thead th {
+            font-weight: 400;
+            height: 22px;
+            background: transparent;
+        }
+
+        .col-reg {
+            width: 39%;
+        }
+
+        .col-fig {
+            width: 16%;
+        }
+
+        .col-words {
+            width: 45%;
+        }
+
+        /* Seamless Borderless Inputs inside Table Cells */
+        .cell-input {
+            width: 100%;
+            height: 100%;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11.5px;
+            color: #000000;
+            padding: 0 4px;
+            margin: 0;
+            display: block;
+            text-align: center;
+        }
+
+        .reg-input {
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .fig-input {
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .words-input {
+            text-transform: uppercase;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.1px;
+        }
+
+        .cell-input:focus,
+        .line-input:focus,
+        .qp-input:focus,
+        .sig-input:focus,
+        .date-input:focus {
+            background-color: rgba(59, 130, 246, 0.08) !important;
+        }
+
+        .total-label {
+            text-align: left !important;
+            padding-left: 5px !important;
+            font-weight: 700;
+            font-size: 11.5px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Bottom Examiner Signature Section */
+        table.sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 2px;
+        }
+
+        table.sig-table td {
+            border: none;
+            padding: 3px 0;
+            vertical-align: bottom;
+            font-size: 11.5px;
+            color: #000000;
+        }
+
+        .sig-label {
+            width: 31%;
+            font-weight: 700;
+            font-style: italic;
+            white-space: nowrap;
+        }
+
+        .sig-colon {
+            width: 4%;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sig-name-col {
+            width: 35%;
+            padding-right: 6px !important;
+        }
+
+        .sig-sign-col {
+            width: 30%;
+        }
+
+        .sig-header-cell {
+            text-align: center;
+            text-decoration: underline;
+            font-size: 11.5px;
+            padding-bottom: 4px !important;
+        }
+
+        .sig-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px dotted #64748b;
+            outline: none;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #000000;
+            height: 17px;
+            padding: 0 2px;
+        }
+
+        .date-session-wrapper {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .date-input {
+            width: 95px;
+            border: none;
+            border-bottom: 1px dotted #64748b;
+            outline: none;
+            background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #000000;
+            height: 17px;
+            padding: 0 2px;
+        }
+
+        .session-box {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 4px;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .session-select {
+            border: none;
+            border-bottom: 1px solid #000000;
+            background: transparent;
+            color: #000000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 0 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Easy Entry Zoom Mode (Single Sheet Full Width for Comfortable Typing) */
+        body.mobile-entry-mode .mobile-sheet-tabs {
+            display: flex;
+        }
+
+        body.mobile-entry-mode .a4-page {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 540px !important;
+            height: auto !important;
+            padding: 14px !important;
+            display: block !important;
+            transform: none !important;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        body.mobile-entry-mode .a4-page::after {
+            display: none;
+        }
+
+        body.mobile-entry-mode .marksheet {
+            display: none;
+        }
+
+        body.mobile-entry-mode .marksheet.mobile-active-sheet {
+            display: flex;
+        }
+
+        body.mobile-entry-mode table.main-table th,
+        body.mobile-entry-mode table.main-table td {
+            height: 32px;
+            font-size: 13px;
+        }
+
+        body.mobile-entry-mode .cell-input {
+            font-size: 13.5px;
+        }
+
+        body.mobile-entry-mode .words-input {
+            font-size: 11.5px;
+        }
+
+        /* Static Text Spans Used Inside Off-Screen PDF Clone */
+        .pdf-static-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000000;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .pdf-static-line {
+            display: inline-block;
+            border-bottom: 1px solid #000000;
+            min-height: 15px;
+            padding: 0 3px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11.5px;
+            color: #000000;
+            vertical-align: baseline;
+        }
+
+        .pdf-static-sig {
+            display: inline-block;
+            width: 100%;
+            min-height: 16px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #000000;
+        }
+
+        /* Clear Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            color: #0f172a;
+            max-width: 360px;
+            width: 100%;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .modal-box h4 {
+            margin: 0 0 8px 0;
+            font-size: 17px;
+        }
+
+        .modal-box p {
+            margin: 0 0 18px 0;
+            font-size: 13.5px;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
         @media screen and (max-width: 820px) {
             body {
                 padding: 8px;
@@ -247,79 +678,84 @@
 
             .btn {
                 flex: 1;
-                padding: 10px 8px;
+                padding: 9px 8px;
                 font-size: 12px;
             }
+        }
 
-            .mobile-mode-bar {
-                display: flex;
+        /* Strict A4 Print Styles */
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                overflow: visible !important;
             }
 
-            /* Mode 1: Easy Mobile Entry View (Single Column Full Width) */
-            body.mobile-entry-mode .mobile-sheet-tabs {
-                display: flex;
+            .no-print {
+                display: none !important;
             }
 
-            body.mobile-entry-mode .a4-page {
-                width: 100%;
-                height: auto;
-                min-height: auto;
-                padding: 12px;
-                display: block;
+            .page-viewport {
+                width: 210mm !important;
+                height: 297mm !important;
+                overflow: visible !important;
+            }
+
+            .a4-page {
+                width: 210mm !important;
+                min-width: 210mm !important;
+                height: 297mm !important;
+                padding: 7mm 7mm !important;
+                box-shadow: none !important;
                 transform: none !important;
-                margin-bottom: 20px;
-                border-radius: 8px;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                column-gap: 8mm !important;
+                margin: 0 !important;
             }
 
-            body.mobile-entry-mode .a4-page::after {
-                display: none;
+            .a4-page::after {
+                display: none !important;
             }
 
-            body.mobile-entry-mode .marksheet {
-                display: none;
+            .marksheet {
+                display: flex !important;
             }
 
-            body.mobile-entry-mode .marksheet.mobile-active-sheet {
-                display: flex;
+            .sig-input,
+            .date-input {
+                border-bottom: none !important;
             }
 
-            body.mobile-entry-mode table.main-table th,
-            body.mobile-entry-mode table.main-table td {
-                height: 34px;
-                font-size: 13px;
-            }
-
-            body.mobile-entry-mode .cell-input {
-                font-size: 14px;
-                padding: 0 6px;
-            }
-
-            body.mobile-entry-mode .words-input {
-                font-size: 11.5px;
-            }
-
-            body.mobile-entry-mode .line-input,
-            body.mobile-entry-mode .qp-input,
-            body.mobile-entry-mode .sig-input,
-            body.mobile-entry-mode .date-input {
-                font-size: 13px;
+            .session-select {
+                border-bottom: none !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Interactive Controls -->
+    <!-- Top Toolbar (Only Download PDF, Print A4, Clear All, and Sync Toggle) -->
     <div class="control-bar no-print">
         <div class="control-group">
             <button type="button" class="btn btn-download" id="downloadPdfBtn" onclick="downloadPDFFile()">
                 📄 Download PDF
             </button>
             <button type="button" class="btn btn-print" onclick="printMarkSheet()">
-                🖨️ Print (A4)
+                🖨️ Print A4
             </button>
             <button type="button" class="btn btn-clear" onclick="openClearModal()">
-                🗑️ Clear
+                🗑️ Clear All
             </button>
         </div>
 
@@ -331,17 +767,17 @@
         </div>
     </div>
 
-    <!-- Mobile Mode Switcher (Visible on Smartphones/Tablets) -->
+    <!-- View Mode Switcher (Fit A4 Side-by-Side to Screen vs Easy Entry Zoom) -->
     <div class="mobile-mode-bar no-print">
-        <button type="button" class="mode-tab active" id="tabEntryMode" onclick="setMobileViewMode('entry')">
-            📱 Mobile Easy Entry
+        <button type="button" class="mode-tab active" id="tabPreviewMode" onclick="setMobileViewMode('preview')">
+            📄 Fit A4 to Screen (2-in-1)
         </button>
-        <button type="button" class="mode-tab" id="tabPreviewMode" onclick="setMobileViewMode('preview')">
-            📄 Full A4 Preview (2-in-1)
+        <button type="button" class="mode-tab" id="tabEntryMode" onclick="setMobileViewMode('entry')">
+            🔍 Easy Entry Zoom (1-by-1)
         </button>
     </div>
 
-    <!-- Mobile Sheet Selector (When in Mobile Easy Entry Mode) -->
+    <!-- Sheet Selector (Visible when in Easy Entry Zoom Mode) -->
     <div class="mobile-sheet-tabs no-print" id="mobileSheetTabs">
         <button type="button" class="sheet-tab-btn active" id="btnSheet1" onclick="selectMobileSheet(1)">
             1. ORIGINAL Sheet (Edit Here)
@@ -355,7 +791,7 @@
     <div class="page-viewport" id="pageViewport">
         <!-- Single A4 Page with Two Side-by-Side Mark Sheets -->
         <div class="a4-page" id="a4Container">
-            <!-- Both Left (ORIGINAL) and Right (DUPLICATE) Mark Sheets are rendered here by JS -->
+            <!-- Left (ORIGINAL) and Right (DUPLICATE) Mark Sheets are injected here -->
         </div>
     </div>
 
@@ -388,7 +824,7 @@
             '.': 'POINT'
         };
 
-        // Converts "20" -> "TWO ZERO", "05" -> "ZERO FIVE", "AB" -> "ABSENT"
+        // Converts "20" -> "TWO ZERO", "08" -> "ZERO EIGHT", "AB" -> "ABSENT"
         function figuresToWords(rawVal) {
             const val = rawVal.trim().toUpperCase();
             if (!val) return '';
@@ -436,7 +872,7 @@
                 <div class="marksheet" id="sheet-${sheetIndex}">
                     <div class="top-meta-row">
                         <div class="qp-box">
-                            <span>QP CODE :</span>
+                            <span class="qp-label">QP CODE :</span>
                             <input type="text" class="qp-input" data-sheet="${sheetIndex}" data-field="qp-code" autocomplete="off" spellcheck="false">
                         </div>
                         <span class="sheet-badge">${badgeLabel}</span>
@@ -448,23 +884,23 @@
                     </div>
 
                     <div class="meta-line">
-                        <input type="text" class="line-input exam-prefix-input" data-sheet="${sheetIndex}" data-field="exam-name" autocomplete="off">
+                        <input type="text" class="line-input exam-prefix-input" data-sheet="${sheetIndex}" data-field="exam-name" autocomplete="off" spellcheck="false">
                         <span>Examinations</span>
-                        <input type="text" class="line-input exam-mid-input" data-sheet="${sheetIndex}" data-field="exam-session" autocomplete="off">
+                        <input type="text" class="line-input exam-mid-input" data-sheet="${sheetIndex}" data-field="exam-session" autocomplete="off" spellcheck="false">
                         <span>20</span>
-                        <input type="text" class="line-input exam-year-input" maxlength="2" data-sheet="${sheetIndex}" data-field="exam-year" autocomplete="off">
+                        <input type="text" class="line-input exam-year-input" maxlength="2" data-sheet="${sheetIndex}" data-field="exam-year" autocomplete="off" spellcheck="false">
                     </div>
 
                     <div class="meta-line">
                         <span>Course</span>
-                        <input type="text" class="line-input course-input" data-sheet="${sheetIndex}" data-field="course" autocomplete="off">
+                        <input type="text" class="line-input course-input" data-sheet="${sheetIndex}" data-field="course" autocomplete="off" spellcheck="false">
                     </div>
 
                     <table class="main-table">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="col-reg bold-th">Register Number</th>
-                                <th colspan="2" class="bold-th">Marks</th>
+                                <th rowspan="2" class="col-reg">Register Number</th>
+                                <th colspan="2">Marks</th>
                             </tr>
                             <tr>
                                 <th class="col-fig">Figures</th>
@@ -478,12 +914,12 @@
                                 <td>
                                     <input type="text" class="cell-input fig-input"
                                         data-sheet="${sheetIndex}" data-field="total-fig" data-row="25" data-col="fig"
-                                        autocomplete="off">
+                                        autocomplete="off" spellcheck="false">
                                 </td>
                                 <td>
                                     <input type="text" class="cell-input words-input"
                                         data-sheet="${sheetIndex}" data-field="total-words" data-row="25" data-col="words"
-                                        autocomplete="off">
+                                        autocomplete="off" spellcheck="false">
                                 </td>
                             </tr>
                         </tbody>
@@ -500,7 +936,7 @@
                             <td class="sig-label">Addl. Examiner</td>
                             <td class="sig-colon">:</td>
                             <td class="sig-name-col">
-                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="addl-examiner" autocomplete="off">
+                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="addl-examiner" autocomplete="off" spellcheck="false">
                             </td>
                             <td class="sig-sign-col"></td>
                         </tr>
@@ -508,7 +944,7 @@
                             <td class="sig-label">Chief Examiner</td>
                             <td class="sig-colon">:</td>
                             <td class="sig-name-col">
-                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="chief-examiner" autocomplete="off">
+                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="chief-examiner" autocomplete="off" spellcheck="false">
                             </td>
                             <td class="sig-sign-col"></td>
                         </tr>
@@ -516,7 +952,7 @@
                             <td class="sig-label">Chairman</td>
                             <td class="sig-colon">:</td>
                             <td class="sig-name-col">
-                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="chairman" autocomplete="off">
+                                <input type="text" class="sig-input" data-sheet="${sheetIndex}" data-field="chairman" autocomplete="off" spellcheck="false">
                             </td>
                             <td class="sig-sign-col"></td>
                         </tr>
@@ -525,7 +961,7 @@
                             <td class="sig-colon">:</td>
                             <td colspan="2">
                                 <div class="date-session-wrapper">
-                                    <input type="text" class="date-input" data-sheet="${sheetIndex}" data-field="date" autocomplete="off">
+                                    <input type="text" class="date-input" data-sheet="${sheetIndex}" data-field="date" autocomplete="off" spellcheck="false">
                                     <div class="session-box">
                                         <span>SESSION :</span>
                                         <select class="session-select" data-sheet="${sheetIndex}" data-field="session-fn-an">
@@ -542,16 +978,14 @@
             `;
         }
 
-        // Initialize the 2 side-by-side sheets
+        // Render both side-by-side sheets
         const a4Container = document.getElementById('a4Container');
         a4Container.innerHTML = createMarkSheetHTML(1) + createMarkSheetHTML(2);
-
-        // Mark Sheet 1 as default active sheet for mobile view
         document.getElementById('sheet-1').classList.add('mobile-active-sheet');
 
         const syncToggle = document.getElementById('syncToggle');
 
-        // Copy all fields (inputs and selects) from Sheet 1 (Original) to Sheet 2 (Duplicate)
+        // Mirror all fields from Sheet 1 (Original) to Sheet 2 (Duplicate)
         function syncAllFromSheet1ToSheet2() {
             const sheet1Fields = document.querySelectorAll('[data-sheet="1"]');
             sheet1Fields.forEach(el1 => {
@@ -563,18 +997,16 @@
             });
         }
 
-        // Handle live input and select events (NO automatic TOTAL summation)
+        // Live input handler (Converts Figures -> Words per student row; leaves TOTAL row untouched)
         function handleFieldChange(e) {
             const target = e.target;
             if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT') return;
 
             const sheetIndex = target.getAttribute('data-sheet');
-            const field = target.getAttribute('data-field');
             const row = target.getAttribute('data-row');
             const col = target.getAttribute('data-col');
 
-            // If user typed in a student row's Figures box, only auto-fill that row's "in words"
-            // TOTAL row is intentionally left untouched (no auto sum)
+            // Only convert student rows (0 to 24); do not auto-sum or fill TOTAL row (row 25)
             if (col === 'fig' && row !== null && parseInt(row, 10) < TOTAL_ROWS) {
                 const wordsEl = document.querySelector(`input[data-sheet="${sheetIndex}"][data-field="words-${row}"]`);
                 if (wordsEl) {
@@ -582,7 +1014,6 @@
                 }
             }
 
-            // Mirror Sheet 1 onto Sheet 2 automatically when sync is active
             if (sheetIndex === '1' && syncToggle.checked) {
                 syncAllFromSheet1ToSheet2();
             }
@@ -591,7 +1022,7 @@
         a4Container.addEventListener('input', handleFieldChange);
         a4Container.addEventListener('change', handleFieldChange);
 
-        // Keyboard navigation (Enter / Arrow keys move smoothly across rows & columns)
+        // Keyboard navigation (Enter / ArrowDown / ArrowUp)
         a4Container.addEventListener('keydown', (e) => {
             const target = e.target;
             if (target.tagName !== 'INPUT') return;
@@ -618,14 +1049,13 @@
             }
         });
 
-        // Toggle syncing
         syncToggle.addEventListener('change', () => {
             if (syncToggle.checked) {
                 syncAllFromSheet1ToSheet2();
             }
         });
 
-        // Build dynamic filename from QP CODE + DATE -> [QP_CODE]_[DATE].pdf
+        // Build dynamic filename from QP CODE + DATE -> [QP_CODE]_[DATE]
         function getDynamicFileName() {
             const qpInput = document.querySelector('input[data-sheet="1"][data-field="qp-code"]');
             const dateInput = document.querySelector('input[data-sheet="1"][data-field="date"]');
@@ -639,7 +1069,7 @@
             return `${cleanQp}_${cleanDate}`;
         }
 
-        // Print with dynamic document title so browser Save-as-PDF uses [QP_CODE]_[DATE].pdf
+        // Print A4 Page
         function printMarkSheet() {
             const originalTitle = document.title;
             document.title = getDynamicFileName();
@@ -649,7 +1079,7 @@
             }, 1000);
         }
 
-        // Direct A4 PDF Download named [QP_CODE]_[DATE].pdf
+        // Off-screen 794px A4 Clone PDF Exporter (Guarantees right side is never clipped on mobile or desktop)
         function downloadPDFFile() {
             const btn = document.getElementById('downloadPdfBtn');
             const originalText = btn.innerHTML;
@@ -657,12 +1087,68 @@
             btn.disabled = true;
 
             const fileName = `${getDynamicFileName()}.pdf`;
-            const wasMobileEntry = document.body.classList.contains('mobile-entry-mode');
 
-            // Temporarily switch to strict A4 side-by-side layout for accurate capture
-            document.body.classList.remove('mobile-entry-mode');
-            a4Container.classList.add('pdf-exporting');
-            document.getElementById('pageViewport').style.height = 'auto';
+            // Create an off-screen 794px x 1122px wrapper
+            const offscreenHost = document.createElement('div');
+            offscreenHost.style.position = 'fixed';
+            offscreenHost.style.top = '0';
+            offscreenHost.style.left = '-9999px';
+            offscreenHost.style.width = '794px';
+            offscreenHost.style.height = '1122px';
+            offscreenHost.style.background = '#ffffff';
+            offscreenHost.style.zIndex = '-1';
+
+            const clonePage = a4Container.cloneNode(true);
+            clonePage.style.transform = 'none';
+            clonePage.style.width = '794px';
+            clonePage.style.minWidth = '794px';
+            clonePage.style.height = '1122px';
+            clonePage.style.padding = '24px 26px';
+            clonePage.style.boxShadow = 'none';
+            clonePage.style.display = 'grid';
+            clonePage.style.gridTemplateColumns = '1fr 1fr';
+            clonePage.style.columnGap = '28px';
+
+            // Ensure both mark sheets are visible in the clone even if mobile was in 1-by-1 mode
+            const cloneSheets = clonePage.querySelectorAll('.marksheet');
+            cloneSheets.forEach(s => {
+                s.style.display = 'flex';
+            });
+
+            // Replace inputs and selects in the clone with crisp static spans so html2canvas renders zero input borders
+            const liveInputs = a4Container.querySelectorAll('input, select');
+            const cloneInputs = clonePage.querySelectorAll('input, select');
+
+            cloneInputs.forEach((cEl, idx) => {
+                const lEl = liveInputs[idx];
+                const val = lEl ? lEl.value : '';
+                const span = document.createElement('span');
+
+                if (cEl.classList.contains('cell-input')) {
+                    span.className = 'pdf-static-text';
+                    span.style.fontWeight = cEl.classList.contains('words-input') ? '600' : '700';
+                    span.style.fontSize = cEl.classList.contains('words-input') ? '10.5px' : '11.5px';
+                    if (cEl.classList.contains('reg-input') || cEl.classList.contains('fig-input') || cEl.classList.contains('words-input')) {
+                        span.style.textTransform = 'uppercase';
+                    }
+                    span.textContent = val;
+                } else if (cEl.classList.contains('line-input') || cEl.classList.contains('qp-input')) {
+                    span.className = 'pdf-static-line';
+                    span.style.width = cEl.offsetWidth ? `${cEl.offsetWidth}px` : '90px';
+                    if (cEl.classList.contains('exam-prefix-input') || cEl.classList.contains('course-input')) {
+                        span.style.flex = '1';
+                    }
+                    span.textContent = val;
+                } else {
+                    span.className = 'pdf-static-sig';
+                    span.textContent = val;
+                }
+
+                cEl.parentNode.replaceChild(span, cEl);
+            });
+
+            offscreenHost.appendChild(clonePage);
+            document.body.appendChild(offscreenHost);
 
             const opt = {
                 margin: 0,
@@ -671,38 +1157,37 @@
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
-                    scrollY: 0,
-                    scrollX: 0
+                    width: 794,
+                    height: 1122,
+                    windowWidth: 794,
+                    windowHeight: 1122,
+                    scrollX: 0,
+                    scrollY: 0
                 },
                 jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
+                    unit: 'px',
+                    format: [794, 1122],
+                    orientation: 'portrait',
+                    hotfixes: ['px_scaling']
                 }
             };
 
-            html2pdf().set(opt).from(a4Container).save().then(() => {
-                a4Container.classList.remove('pdf-exporting');
-                if (wasMobileEntry) {
-                    document.body.classList.add('mobile-entry-mode');
-                }
-                applyMobileScaling();
+            html2pdf().set(opt).from(clonePage).save().then(() => {
+                document.body.removeChild(offscreenHost);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }).catch(() => {
-                a4Container.classList.remove('pdf-exporting');
-                if (wasMobileEntry) {
-                    document.body.classList.add('mobile-entry-mode');
+                if ( document.body.contains(offscreenHost) ) {
+                    document.body.removeChild(offscreenHost);
                 }
-                applyMobileScaling();
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 printMarkSheet();
             });
         }
 
-        // Mobile View Mode & Responsive Auto-Scaling Logic
-        let currentMobileMode = 'entry'; // 'entry' or 'preview'
+        // Responsive Mobile Scaling: Default is 'preview' (Fit Full A4 Side-by-Side to Screen)
+        let currentMobileMode = 'preview';
 
         function setMobileViewMode(mode) {
             currentMobileMode = mode;
@@ -740,24 +1225,24 @@
             }
         }
 
-        // Scales the 210mm A4 sheet smoothly to fit mobile screens when in Preview mode
         function applyMobileScaling() {
             const viewport = document.getElementById('pageViewport');
-            if (window.innerWidth <= 820) {
-                if (currentMobileMode === 'entry') {
-                    document.body.classList.add('mobile-entry-mode');
-                    a4Container.style.transform = 'none';
-                    viewport.style.height = 'auto';
-                } else {
-                    document.body.classList.remove('mobile-entry-mode');
-                    const availableWidth = window.innerWidth - 16;
-                    const a4PixelWidth = 794; // 210mm at 96 DPI
-                    const scale = Math.min(1, availableWidth / a4PixelWidth);
-                    a4Container.style.transform = `scale(${scale})`;
-                    viewport.style.height = `${1123 * scale + 20}px`;
-                }
+            if (currentMobileMode === 'entry') {
+                document.body.classList.add('mobile-entry-mode');
+                a4Container.style.transform = 'none';
+                viewport.style.height = 'auto';
+                return;
+            }
+
+            document.body.classList.remove('mobile-entry-mode');
+            const availableWidth = document.documentElement.clientWidth - 16;
+            const a4PixelWidth = 794;
+
+            if (availableWidth < a4PixelWidth) {
+                const scale = availableWidth / a4PixelWidth;
+                a4Container.style.transform = `scale(${scale})`;
+                viewport.style.height = `${Math.ceil(1122 * scale) + 12}px`;
             } else {
-                document.body.classList.remove('mobile-entry-mode');
                 a4Container.style.transform = 'none';
                 viewport.style.height = 'auto';
             }
@@ -767,7 +1252,7 @@
         window.addEventListener('DOMContentLoaded', applyMobileScaling);
         applyMobileScaling();
 
-        // Modal functions for Clear All
+        // Modal Controls for Clear All
         function openClearModal() {
             document.getElementById('clearModal').classList.add('active');
         }
