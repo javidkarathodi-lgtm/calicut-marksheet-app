@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>University of Calicut - Interactive Mark Sheet</title>
-    <!-- jsPDF for 100% reliable, cutoff-free side-by-side A4 PDF generation on mobile & desktop -->
+    <!-- jsPDF for 100% reliable, single-page side-by-side A4 PDF generation on mobile & desktop -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -13,15 +13,19 @@
             print-color-adjust: exact;
         }
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #cbd5e1;
+        html, body {
             margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000000;
+        }
+
+        body {
+            background-color: #cbd5e1;
             padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #000000;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -168,29 +172,31 @@
             overflow: hidden;
         }
 
-        /* Exact A4 Portrait Page (794px x 1123px at 96 DPI = 210mm x 297mm) */
+        /* Single A4 Page Container - Compact vertical height so iOS/Android Print Preview never spills to Page 2 */
         .a4-page {
             background: #ffffff;
             width: 794px;
             min-width: 794px;
-            height: 1123px;
-            padding: 24px 26px;
+            height: 1050px;
+            padding: 18px 24px;
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: 28px;
+            column-gap: 24px;
             align-items: start;
             position: relative;
             transform-origin: top center;
             color: #000000;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         /* Subtle center guide line on screen only */
         .a4-page::after {
             content: "";
             position: absolute;
-            top: 16px;
-            bottom: 16px;
+            top: 14px;
+            bottom: 14px;
             left: 50%;
             border-left: 1px dashed #cbd5e1;
             pointer-events: none;
@@ -203,6 +209,8 @@
             flex-direction: column;
             position: relative;
             color: #000000;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         /* Top Row: QP CODE on Left, ORIGINAL / DUPLICATE on Right */
@@ -210,8 +218,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
-            font-size: 11.5px;
+            margin-bottom: 3px;
+            font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -225,7 +233,7 @@
         .qp-label {
             color: #000000;
             font-weight: 700;
-            font-size: 11.5px;
+            font-size: 11px;
         }
 
         .qp-input {
@@ -238,15 +246,15 @@
             border-radius: 0;
             width: 115px;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             color: #000000;
             padding: 0 2px;
-            height: 16px;
+            height: 15px;
         }
 
         .sheet-badge {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.4px;
             color: #000000;
@@ -256,21 +264,21 @@
         /* Centered University Header */
         .header {
             text-align: center;
-            margin-bottom: 8px;
-            line-height: 1.25;
+            margin-bottom: 6px;
+            line-height: 1.2;
         }
 
         .header h2 {
             margin: 0;
-            font-size: 15.5px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
 
         .header h3 {
-            margin: 3px 0 0 0;
-            font-size: 14.5px;
+            margin: 2px 0 0 0;
+            font-size: 14px;
             font-weight: 700;
             letter-spacing: 0.3px;
             text-transform: uppercase;
@@ -282,8 +290,8 @@
             align-items: baseline;
             width: 100%;
             white-space: nowrap;
-            font-size: 12px;
-            margin-bottom: 5px;
+            font-size: 11.5px;
+            margin-bottom: 4px;
             color: #000000;
         }
 
@@ -296,10 +304,10 @@
             appearance: none;
             border-radius: 0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11.5px;
+            font-size: 11px;
             color: #000000;
-            padding: 0 3px;
-            height: 16px;
+            padding: 0 2px;
+            height: 15px;
             min-width: 0;
         }
 
@@ -308,19 +316,20 @@
             text-align: center;
         }
 
+        /* Wide enough to display "November" without clipping */
         .exam-mid-input {
-            width: 48px;
+            width: 64px;
             text-align: center;
         }
 
         .exam-year-input {
-            width: 26px;
+            width: 22px;
             text-align: left;
         }
 
         .course-input {
             flex: 1;
-            margin-left: 2px;
+            margin-left: 3px;
         }
 
         /* Main Marks Table - Strict Connected Black Grid */
@@ -330,7 +339,7 @@
             border: 1.5px solid #000000;
             table-layout: fixed;
             margin-top: 2px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         table.main-table th,
@@ -338,16 +347,16 @@
             border: 1px solid #000000;
             padding: 0;
             margin: 0;
-            height: 26.5px;
+            height: 23.5px;
             vertical-align: middle;
             text-align: center;
-            font-size: 11.5px;
+            font-size: 11px;
             color: #000000;
         }
 
         table.main-table thead th {
             font-weight: 400;
-            height: 22px;
+            height: 20px;
             background: transparent;
         }
 
@@ -375,9 +384,9 @@
             appearance: none;
             border-radius: 0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11.5px;
+            font-size: 11px;
             color: #000000;
-            padding: 0 4px;
+            padding: 0 3px;
             margin: 0;
             display: block;
             text-align: center;
@@ -385,7 +394,7 @@
 
         .reg-input {
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.2px;
         }
 
@@ -396,8 +405,8 @@
 
         .words-input {
             text-transform: uppercase;
-            font-size: 10.5px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             letter-spacing: 0.1px;
         }
 
@@ -413,7 +422,7 @@
             text-align: left !important;
             padding-left: 5px !important;
             font-weight: 700;
-            font-size: 11.5px;
+            font-size: 11px;
             letter-spacing: 0.3px;
         }
 
@@ -422,14 +431,14 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         table.sig-table td {
             border: none;
-            padding: 3px 0;
+            padding: 2px 0;
             vertical-align: bottom;
-            font-size: 11.5px;
+            font-size: 11px;
             color: #000000;
         }
 
@@ -458,8 +467,8 @@
         .sig-header-cell {
             text-align: center;
             text-decoration: underline;
-            font-size: 11.5px;
-            padding-bottom: 4px !important;
+            font-size: 11px;
+            padding-bottom: 2px !important;
         }
 
         .sig-input {
@@ -472,9 +481,9 @@
             appearance: none;
             border-radius: 0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
+            font-size: 10.5px;
             color: #000000;
-            height: 17px;
+            height: 15px;
             padding: 0 2px;
         }
 
@@ -482,12 +491,12 @@
             display: flex;
             align-items: baseline;
             justify-content: space-between;
-            gap: 6px;
+            gap: 4px;
             width: 100%;
         }
 
         .date-input {
-            width: 95px;
+            width: 90px;
             border: none;
             border-bottom: 1px dotted #64748b;
             outline: none;
@@ -496,18 +505,18 @@
             appearance: none;
             border-radius: 0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
+            font-size: 10.5px;
             color: #000000;
-            height: 17px;
+            height: 15px;
             padding: 0 2px;
         }
 
         .session-box {
             display: inline-flex;
             align-items: baseline;
-            gap: 4px;
+            gap: 3px;
             white-space: nowrap;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
         }
 
@@ -517,7 +526,7 @@
             background: transparent;
             color: #000000;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
             padding: 0 2px;
             outline: none;
@@ -628,10 +637,10 @@
             }
         }
 
-        /* Strict A4 Print Styles */
+        /* Strict 1-Page A4 Print Styles (Prevents Page 2 Spill on iOS Safari & Android Chrome) */
         @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 0mm !important;
         }
 
         @media print {
@@ -639,9 +648,9 @@
                 background: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                overflow: visible !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: hidden !important;
             }
 
             .no-print {
@@ -649,22 +658,28 @@
             }
 
             .page-viewport {
-                width: 210mm !important;
-                height: 297mm !important;
+                width: 100% !important;
+                height: auto !important;
                 overflow: visible !important;
+                display: block !important;
             }
 
             .a4-page {
-                width: 210mm !important;
-                min-width: 210mm !important;
-                height: 297mm !important;
-                padding: 7mm 7mm !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 210mm !important;
+                height: auto !important;
+                max-height: 274mm !important;
+                padding: 6mm 8mm !important;
+                margin: 0 auto !important;
                 box-shadow: none !important;
                 transform: none !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                column-gap: 8mm !important;
-                margin: 0 !important;
+                column-gap: 7mm !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
 
             .a4-page::after {
@@ -673,6 +688,19 @@
 
             .marksheet {
                 display: flex !important;
+            }
+
+            table.main-table th,
+            table.main-table td {
+                height: 21px !important;
+            }
+
+            table.main-table thead th {
+                height: 18px !important;
+            }
+
+            table.sig-table td {
+                padding: 1.5px 0 !important;
             }
 
             .sig-input,
@@ -824,9 +852,9 @@
                     <div class="meta-line">
                         <input type="text" class="line-input exam-prefix-input" data-sheet="${sheetIndex}" data-field="exam-name" autocomplete="off" spellcheck="false">
                         <span>Examinations</span>
-                        <input type="text" class="line-input exam-mid-input" data-sheet="${sheetIndex}" data-field="exam-session" autocomplete="off" spellcheck="false">
+                        <input type="text" class="line-input exam-mid-input" value="November" data-sheet="${sheetIndex}" data-field="exam-session" autocomplete="off" spellcheck="false">
                         <span>20</span>
-                        <input type="text" class="line-input exam-year-input" maxlength="2" data-sheet="${sheetIndex}" data-field="exam-year" autocomplete="off" spellcheck="false">
+                        <input type="text" class="line-input exam-year-input" value="26" maxlength="2" data-sheet="${sheetIndex}" data-field="exam-year" autocomplete="off" spellcheck="false">
                     </div>
 
                     <div class="meta-line">
@@ -1006,8 +1034,9 @@
             return el ? el.value.trim() : '';
         }
 
-        // Print A4 Page
+        // Print A4 Page (Guaranteed 1 Page)
         function printMarkSheet() {
+            syncAllFromOriginalToDuplicate();
             const originalTitle = document.title;
             document.title = getDynamicFileName();
             window.print();
@@ -1018,8 +1047,7 @@
 
         /*
          * Direct High-Resolution A4 Canvas + jsPDF Renderer
-         * Completely immune to CSS scale(), mobile screen width, or scroll offsets.
-         * Always draws BOTH ORIGINAL (left) and DUPLICATE (right) side-by-side on 1 A4 page.
+         * Draws BOTH ORIGINAL (left) and DUPLICATE (right) side-by-side on 1 single A4 page.
          */
         function renderSingleSheetOnCanvas(ctx, sheetIndex, originX, originY, colW) {
             ctx.fillStyle = '#000000';
@@ -1028,43 +1056,43 @@
             let y = originY;
 
             // 1. Top Row: QP CODE on left, ORIGINAL / DUPLICATE on right
-            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'alphabetic';
-            ctx.fillText('QP CODE :', originX, y + 12);
+            ctx.fillText('QP CODE :', originX, y + 11);
 
-            const qpLineStart = originX + 64;
-            const qpLineEnd = originX + 185;
+            const qpLineStart = originX + 60;
+            const qpLineEnd = originX + 180;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(qpLineStart, y + 14);
-            ctx.lineTo(qpLineEnd, y + 14);
+            ctx.moveTo(qpLineStart, y + 13);
+            ctx.lineTo(qpLineEnd, y + 13);
             ctx.stroke();
 
             const qpVal = getSheetVal(sheetIndex, 'qp-code');
             if (qpVal) {
-                ctx.fillText(qpVal, qpLineStart + 3, y + 12);
+                ctx.fillText(qpVal, qpLineStart + 3, y + 11);
             }
 
             const badgeText = sheetIndex === 1 ? 'ORIGINAL' : 'DUPLICATE';
             ctx.textAlign = 'right';
-            ctx.fillText(badgeText, originX + colW, y + 12);
+            ctx.fillText(badgeText, originX + colW, y + 11);
 
-            y += 26;
+            y += 23;
 
             // 2. Centered Header: UNIVERSITY OF CALICUT / MARK SHEET
             ctx.textAlign = 'center';
-            ctx.font = 'bold 15.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'bold 15px Arial, Helvetica, sans-serif';
             ctx.fillText('UNIVERSITY OF CALICUT', originX + colW / 2, y + 10);
 
-            y += 20;
-            ctx.font = 'bold 14.5px Arial, Helvetica, sans-serif';
+            y += 18;
+            ctx.font = 'bold 14px Arial, Helvetica, sans-serif';
             ctx.fillText('MARK SHEET', originX + colW / 2, y + 8);
 
-            y += 22;
+            y += 20;
 
-            // 3. Examinations Line: __________Examinations_____20___
-            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            // 3. Examinations Line: __________Examinations__November__2026
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
 
             const examLabel = 'Examinations';
@@ -1072,8 +1100,8 @@
             const yearPrefix = '20';
             const yearPrefixW = ctx.measureText(yearPrefix).width;
 
-            const yearLineW = 26;
-            const midLineW = 48;
+            const yearLineW = 22;
+            const midLineW = 64; // Wide enough so "November" never clips
             const prefixLineW = colW - examLabelW - midLineW - yearPrefixW - yearLineW - 4;
 
             let curX = originX;
@@ -1085,18 +1113,18 @@
 
             const examNameVal = getSheetVal(sheetIndex, 'exam-name');
             if (examNameVal) {
-                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(examNameVal, curX + prefixLineW / 2, y + 10);
             }
 
             curX += prefixLineW + 1;
-            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(examLabel, curX, y + 11);
             curX += examLabelW + 1;
 
-            // Middle line between Examinations and 20
+            // Middle line between Examinations and 20 (for "November")
             ctx.beginPath();
             ctx.moveTo(curX, y + 12);
             ctx.lineTo(curX + midLineW, y + 12);
@@ -1104,13 +1132,13 @@
 
             const examSessionVal = getSheetVal(sheetIndex, 'exam-session');
             if (examSessionVal) {
-                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(examSessionVal, curX + midLineW / 2, y + 10);
             }
 
             curX += midLineW + 1;
-            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(yearPrefix, curX, y + 11);
             curX += yearPrefixW + 1;
@@ -1123,15 +1151,15 @@
 
             const examYearVal = getSheetVal(sheetIndex, 'exam-year');
             if (examYearVal) {
-                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText(examYearVal, curX + 2, y + 10);
             }
 
-            y += 20;
+            y += 18;
 
             // 4. Course Line: Course__________________________
-            ctx.font = 'normal 12px Arial, Helvetica, sans-serif';
+            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             const courseLabel = 'Course';
             ctx.fillText(courseLabel, originX, y + 11);
@@ -1144,11 +1172,11 @@
 
             const courseVal = getSheetVal(sheetIndex, 'course');
             if (courseVal) {
-                ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
                 ctx.fillText(courseVal, originX + courseLabelW + 6, y + 10);
             }
 
-            y += 18;
+            y += 16;
 
             // 5. Main Table (2 Header Rows + 25 Student Rows + 1 TOTAL Row)
             const tableTop = y;
@@ -1156,8 +1184,8 @@
             const figColW = Math.round(colW * 0.20);
             const wordsColW = colW - regColW - figColW;
 
-            const headerRowH = 22;
-            const dataRowH = 26.5;
+            const headerRowH = 20;
+            const dataRowH = 24;
             const totalRowsCount = TOTAL_ROWS + 1; // 25 student rows + 1 TOTAL row
             const tableH = (headerRowH * 2) + (dataRowH * totalRowsCount);
 
@@ -1167,13 +1195,11 @@
 
             // Vertical Column Dividers
             ctx.lineWidth = 1;
-            // Between Register Number and Figures
             ctx.beginPath();
             ctx.moveTo(originX + regColW, tableTop);
             ctx.lineTo(originX + regColW, tableTop + tableH);
             ctx.stroke();
 
-            // Between Figures and in words (starts from header row 2)
             ctx.beginPath();
             ctx.moveTo(originX + regColW + figColW, tableTop + headerRowH);
             ctx.lineTo(originX + regColW + figColW, tableTop + tableH);
@@ -1192,7 +1218,7 @@
             ctx.stroke();
 
             // Header Texts
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('Register Number', originX + regColW / 2, tableTop + headerRowH);
@@ -1203,7 +1229,6 @@
             // 25 Student Rows + 1 TOTAL Row
             let rowY = tableTop + headerRowH * 2;
             for (let r = 0; r < TOTAL_ROWS; r++) {
-                // Row bottom line
                 ctx.beginPath();
                 ctx.moveTo(originX, rowY + dataRowH);
                 ctx.lineTo(originX + colW, rowY + dataRowH);
@@ -1216,17 +1241,17 @@
                 const centerY = rowY + dataRowH / 2 + 0.5;
 
                 if (regVal) {
-                    ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(regVal, originX + regColW / 2, centerY);
                 }
                 if (figVal) {
-                    ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(figVal, originX + regColW + figColW / 2, centerY);
                 }
                 if (wordsVal) {
-                    ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
+                    ctx.font = 'bold 10px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(wordsVal, originX + regColW + figColW + wordsColW / 2, centerY);
                 }
@@ -1236,7 +1261,7 @@
 
             // TOTAL Row
             const totalCenterY = rowY + dataRowH / 2 + 0.5;
-            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('TOTAL', originX + 5, totalCenterY);
 
@@ -1247,12 +1272,12 @@
                 ctx.fillText(totalFigVal, originX + regColW + figColW / 2, totalCenterY);
             }
             if (totalWordsVal) {
-                ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'bold 10px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(totalWordsVal, originX + regColW + figColW + wordsColW / 2, totalCenterY);
             }
 
-            y = tableTop + tableH + 16;
+            y = tableTop + tableH + 14;
 
             // 6. Bottom Signature Block
             ctx.textBaseline = 'alphabetic';
@@ -1262,7 +1287,7 @@
             const signColW = colW - labelColW - colonColW - nameColW;
 
             // Underlined Name and Signature headers
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'center';
             const nameHeaderX = originX + labelColW + colonColW + nameColW / 2;
             const signHeaderX = originX + labelColW + colonColW + nameColW + signColW / 2;
@@ -1288,47 +1313,47 @@
             ];
 
             sigRows.forEach(item => {
-                y += 22;
-                ctx.font = 'italic bold 11.5px Arial, Helvetica, sans-serif';
+                y += 20;
+                ctx.font = 'italic bold 11px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText(item.label, originX, y);
 
-                ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+                ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(':', originX + labelColW + colonColW / 2, y);
 
                 const val = getSheetVal(sheetIndex, item.field);
                 if (val) {
-                    ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
+                    ctx.font = 'normal 10.5px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'left';
                     ctx.fillText(val, originX + labelColW + colonColW + 4, y);
                 }
             });
 
-            // Date & Session Row
-            y += 22;
-            ctx.font = 'italic bold 11.5px Arial, Helvetica, sans-serif';
+            // Date & Session Row (Fits with plenty of bottom margin on Page 1)
+            y += 20;
+            ctx.font = 'italic bold 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('Date', originX, y);
 
-            ctx.font = 'bold 11.5px Arial, Helvetica, sans-serif';
+            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(':', originX + labelColW + colonColW / 2, y);
 
             const dateVal = getSheetVal(sheetIndex, 'date');
             if (dateVal) {
-                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
+                ctx.font = 'normal 10.5px Arial, Helvetica, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText(dateVal, originX + labelColW + colonColW + 4, y);
             }
 
             const sessionVal = getSheetVal(sheetIndex, 'session-fn-an') || 'FN / AN';
-            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
+            ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText(`SESSION : ${sessionVal}`, originX + colW, y);
         }
 
-        // Export High-Resolution Side-by-Side A4 PDF ([QPCODE]_[DATE].pdf)
+        // Export High-Resolution Side-by-Side 1-Page A4 PDF ([QPCODE]_[DATE].pdf)
         function downloadPDFFile() {
             const btn = document.getElementById('downloadPdfBtn');
             const originalText = btn.innerHTML;
@@ -1336,10 +1361,9 @@
             btn.disabled = true;
 
             try {
-                // Ensure Duplicate has latest Original values
                 syncAllFromOriginalToDuplicate();
 
-                // Create 3x Scale High-DPI A4 Canvas (794x1123 logical px -> 2382x3369 actual px)
+                // Create 3x Scale High-DPI A4 Canvas (794x1123 logical px)
                 const scaleFactor = 3;
                 const logicalW = 794;
                 const logicalH = 1123;
@@ -1356,10 +1380,10 @@
                 ctx.fillRect(0, 0, logicalW, logicalH);
 
                 // Page Padding & 2-Column Geometry
-                const padX = 26;
-                const padY = 24;
-                const colGap = 28;
-                const colW = (logicalW - (padX * 2) - colGap) / 2; // 357px per column
+                const padX = 24;
+                const padY = 22;
+                const colGap = 24;
+                const colW = (logicalW - (padX * 2) - colGap) / 2;
 
                 // Draw Left Column (ORIGINAL) and Right Column (DUPLICATE)
                 renderSingleSheetOnCanvas(ctx, 1, padX, padY, colW);
@@ -1439,7 +1463,7 @@
             if (availableWidth < a4PixelWidth) {
                 const scale = availableWidth / a4PixelWidth;
                 a4Container.style.transform = `scale(${scale})`;
-                viewport.style.height = `${Math.ceil(1123 * scale) + 12}px`;
+                viewport.style.height = `${Math.ceil(1050 * scale) + 12}px`;
             } else {
                 a4Container.style.transform = 'none';
                 viewport.style.height = 'auto';
@@ -1461,7 +1485,16 @@
 
         function confirmClearAll() {
             const allInputs = a4Container.querySelectorAll('input');
-            allInputs.forEach(inp => { inp.value = ''; });
+            allInputs.forEach(inp => {
+                const field = inp.getAttribute('data-field');
+                if (field === 'exam-session') {
+                    inp.value = 'November';
+                } else if (field === 'exam-year') {
+                    inp.value = '26';
+                } else {
+                    inp.value = '';
+                }
+            });
             const allSelects = a4Container.querySelectorAll('select');
             allSelects.forEach(sel => { sel.selectedIndex = 0; });
             closeClearModal();
