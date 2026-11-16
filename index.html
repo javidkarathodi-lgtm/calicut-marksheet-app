@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>University of Calicut - Interactive Mark Sheet</title>
-    <!-- jsPDF for 100% reliable, single-page side-by-side A4 PDF generation on mobile & desktop -->
+    <!-- html2canvas & jsPDF for 100% reliable, single-page side-by-side A4 PDF generation on mobile & desktop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -60,7 +61,7 @@
 
         .btn {
             border: none;
-            padding: 9px 16px;
+            padding: 9px 14px;
             font-size: 13px;
             font-weight: 700;
             border-radius: 6px;
@@ -172,17 +173,17 @@
             overflow: hidden;
         }
 
-        /* Single A4 Page Container - Compact vertical height so iOS/Android Print Preview never spills to Page 2 */
+        /* Single A4 Page Container - Compact vertical height so Print Preview never spills to Page 2 */
         .a4-page {
             background: #ffffff;
             width: 794px;
             min-width: 794px;
-            height: 1050px;
-            padding: 18px 24px;
+            height: 1065px;
+            padding: 18px 22px;
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: 24px;
+            column-gap: 22px;
             align-items: start;
             position: relative;
             transform-origin: top center;
@@ -205,6 +206,7 @@
         /* Individual Mark Sheet Column */
         .marksheet {
             width: 100%;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -238,19 +240,19 @@
 
         .qp-input {
             border: none;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1.2px solid #000000;
             outline: none;
             background: transparent;
             -webkit-appearance: none;
             appearance: none;
             border-radius: 0;
-            width: 115px;
+            width: 120px;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11px;
             font-weight: 700;
             color: #000000;
             padding: 0 2px;
-            height: 15px;
+            height: 16px;
         }
 
         .sheet-badge {
@@ -264,8 +266,8 @@
         /* Centered University Header */
         .header {
             text-align: center;
-            margin-bottom: 6px;
-            line-height: 1.2;
+            margin-bottom: 5px;
+            line-height: 1.18;
         }
 
         .header h2 {
@@ -278,58 +280,109 @@
 
         .header h3 {
             margin: 2px 0 0 0;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
 
-        /* Single-Line Examinations & Course Rows */
+        /* Single-Line Examinations & Course Rows with Auto-Fit Support */
         .meta-line {
             display: flex;
             align-items: baseline;
             width: 100%;
             white-space: nowrap;
-            font-size: 11.5px;
+            font-size: 11px;
             margin-bottom: 4px;
             color: #000000;
+            gap: 2px;
+        }
+
+        .course-meta-line {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #000000;
+            gap: 4px;
+        }
+
+        .course-label {
+            white-space: nowrap;
+            padding-bottom: 1px;
         }
 
         .line-input {
             border: none;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1.2px solid #000000;
             outline: none;
             background: transparent;
             -webkit-appearance: none;
             appearance: none;
             border-radius: 0;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
+            font-size: 10.5px;
             color: #000000;
             padding: 0 2px;
-            height: 15px;
+            height: 16px;
             min-width: 0;
         }
 
         .exam-prefix-input {
-            flex: 1;
+            flex: 1 1 auto;
             text-align: center;
+            font-weight: 600;
+            overflow: hidden;
         }
 
         /* Wide enough to display "November" without clipping */
         .exam-mid-input {
-            width: 64px;
+            width: 58px;
+            flex: 0 0 58px;
             text-align: center;
         }
 
         .exam-year-input {
-            width: 22px;
+            width: 20px;
+            flex: 0 0 20px;
             text-align: left;
         }
 
-        .course-input {
-            flex: 1;
-            margin-left: 3px;
+        /* Auto-fitting & Auto-wrapping Course Field so long paper names NEVER truncate */
+        .course-input-wrap {
+            flex: 1 1 auto;
+            min-width: 0;
+            border-bottom: 1.2px solid #000000;
+            display: flex;
+            align-items: flex-end;
+            min-height: 16px;
+            padding-bottom: 1px;
+        }
+
+        .course-textarea {
+            width: 100%;
+            border: none !important;
+            outline: none !important;
+            background: transparent !important;
+            resize: none;
+            overflow: hidden;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #000000;
+            padding: 0 2px;
+            margin: 0;
+            line-height: 1.15;
+            height: 15px;
+            min-height: 15px;
+            display: block;
+            white-space: nowrap;
+        }
+
+        .course-textarea.multiline {
+            white-space: normal;
+            word-break: break-word;
         }
 
         /* Main Marks Table - Strict Connected Black Grid */
@@ -347,7 +400,7 @@
             border: 1px solid #000000;
             padding: 0;
             margin: 0;
-            height: 23.5px;
+            height: 23px;
             vertical-align: middle;
             text-align: center;
             font-size: 11px;
@@ -356,7 +409,7 @@
 
         table.main-table thead th {
             font-weight: 400;
-            height: 20px;
+            height: 19px;
             background: transparent;
         }
 
@@ -365,11 +418,11 @@
         }
 
         .col-fig {
-            width: 20%;
+            width: 18%;
         }
 
         .col-words {
-            width: 42%;
+            width: 44%;
         }
 
         /* Seamless Borderless Inputs inside Table Cells */
@@ -412,6 +465,7 @@
 
         .cell-input:focus,
         .line-input:focus,
+        .course-textarea:focus,
         .qp-input:focus,
         .sig-input:focus,
         .date-input:focus {
@@ -621,6 +675,15 @@
             justify-content: center;
         }
 
+        /* Print-safe static spans created inside off-screen PDF clone & print mode */
+        .print-text-span {
+            display: inline-block;
+            vertical-align: bottom;
+            color: #000000;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.15;
+        }
+
         @media screen and (max-width: 820px) {
             body {
                 padding: 8px;
@@ -669,7 +732,7 @@
                 min-width: 0 !important;
                 max-width: 210mm !important;
                 height: auto !important;
-                max-height: 274mm !important;
+                max-height: 276mm !important;
                 padding: 6mm 8mm !important;
                 margin: 0 auto !important;
                 box-shadow: none !important;
@@ -718,28 +781,28 @@
 </head>
 <body>
 
-    <!-- Top Toolbar (Download PDF, Print A4, Clear All) -->
+    <!-- Top Toolbar (Download PDF, Print, Clear) -->
     <div class="control-bar no-print">
         <div class="control-group">
             <button type="button" class="btn btn-download" id="downloadPdfBtn" onclick="downloadPDFFile()">
                 📄 Download PDF
             </button>
             <button type="button" class="btn btn-print" onclick="printMarkSheet()">
-                🖨️ Print A4
+                🖨️ Print
             </button>
             <button type="button" class="btn btn-clear" onclick="openClearModal()">
-                🗑️ Clear All
+                🗑️ Clear
             </button>
         </div>
     </div>
 
-    <!-- View Mode Switcher (Fit A4 Side-by-Side to Screen vs Easy Entry Zoom) -->
+    <!-- View Mode Switcher (Fit A4 to Screen vs Easy Entry Zoom) -->
     <div class="mobile-mode-bar no-print">
         <button type="button" class="mode-tab active" id="tabPreviewMode" onclick="setMobileViewMode('preview')">
             📄 Fit A4 to Screen (2-in-1)
         </button>
         <button type="button" class="mode-tab" id="tabEntryMode" onclick="setMobileViewMode('entry')">
-            🔍 Easy Entry Zoom (1-by-1)
+            🔍 Easy Entry Zoom
         </button>
     </div>
 
@@ -765,7 +828,7 @@
     <div class="modal-overlay no-print" id="clearModal">
         <div class="modal-box">
             <h4>Clear All Entries?</h4>
-            <p>This will erase all QP Code, Register Numbers, Marks, and Examiner details from both mark sheets.</p>
+            <p>This will erase all QP Code, Course, Register Numbers, Marks, and Examiner details from both mark sheets.</p>
             <div class="modal-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeClearModal()">Cancel</button>
                 <button type="button" class="btn btn-clear" onclick="confirmClearAll()">Yes, Clear</button>
@@ -790,6 +853,10 @@
             '.': 'POINT'
         };
 
+        // Shared offscreen canvas context for accurate text width measurement
+        const measureCanvas = document.createElement('canvas');
+        const measureCtx = measureCanvas.getContext('2d');
+
         // Converts "20" -> "TWO ZERO", "08" -> "ZERO EIGHT", "AB" -> "ABSENT"
         function figuresToWords(rawVal) {
             const val = rawVal.trim().toUpperCase();
@@ -805,6 +872,70 @@
                 }
             }
             return words.join(' ');
+        }
+
+        /*
+         * Dynamically shrinks font-size (from maxPx down to minPx) so long text fits inside targetWidth.
+         * For Course fields (.course-textarea), if the text is still wider than the line at minPx (7.5px),
+         * it automatically enables clean 2-line wrapping so not a single character is ever cut off!
+         */
+        function fitTextToWidth(el, maxPx = 10.5, minPx = 7.2, fontWeight = '600') {
+            if (!el) return;
+            const text = (el.value || '').trim();
+            const isCourse = el.classList.contains('course-textarea');
+
+            // Use exact A4 column target widths so calculation works even when mobile-entry-mode is active
+            let availableW = el.clientWidth - 6;
+            if (availableW <= 40) {
+                availableW = isCourse ? 320 : 185;
+            } else {
+                // Clamp to A4 column width so Easy Entry wide view doesn't overestimate A4 width
+                const a4MaxW = isCourse ? 322 : 192;
+                availableW = Math.min(availableW, a4MaxW);
+            }
+
+            if (!text) {
+                el.style.fontSize = `${maxPx}px`;
+                if (isCourse) {
+                    el.classList.remove('multiline');
+                    el.style.height = '15px';
+                }
+                return;
+            }
+
+            let chosenSize = maxPx;
+            while (chosenSize > minPx) {
+                measureCtx.font = `${fontWeight} ${chosenSize}px Arial, Helvetica, sans-serif`;
+                if (measureCtx.measureText(text).width <= availableW) {
+                    break;
+                }
+                chosenSize = Math.round((chosenSize - 0.3) * 10) / 10;
+            }
+
+            el.style.fontSize = `${chosenSize}px`;
+
+            if (isCourse) {
+                measureCtx.font = `${fontWeight} ${chosenSize}px Arial, Helvetica, sans-serif`;
+                const textW = measureCtx.measureText(text).width;
+                if (textW > availableW) {
+                    // Wrap cleanly onto 2 lines if still wider than 1 line at 7.2px
+                    el.classList.add('multiline');
+                    el.style.height = 'auto';
+                    el.style.height = `${Math.min(el.scrollHeight, 26)}px`;
+                } else {
+                    el.classList.remove('multiline');
+                    el.style.height = '15px';
+                }
+            }
+        }
+
+        function autoFitAllHeaderFields() {
+            document.querySelectorAll('[data-field="exam-name"]').forEach(el => {
+                fitTextToWidth(el, 10.5, 7.0, '600');
+            });
+            document.querySelectorAll('[data-field="course"]').forEach(el => {
+                fitTextToWidth(el, 10.5, 7.2, '600');
+            });
         }
 
         // Build the HTML for a single Mark Sheet column (1 = ORIGINAL, 2 = DUPLICATE)
@@ -857,9 +988,11 @@
                         <input type="text" class="line-input exam-year-input" value="26" maxlength="2" data-sheet="${sheetIndex}" data-field="exam-year" autocomplete="off" spellcheck="false">
                     </div>
 
-                    <div class="meta-line">
-                        <span>Course</span>
-                        <input type="text" class="line-input course-input" data-sheet="${sheetIndex}" data-field="course" autocomplete="off" spellcheck="false">
+                    <div class="course-meta-line">
+                        <span class="course-label">Course</span>
+                        <div class="course-input-wrap">
+                            <textarea rows="1" class="course-textarea" data-sheet="${sheetIndex}" data-field="course" autocomplete="off" spellcheck="false"></textarea>
+                        </div>
                     </div>
 
                     <table class="main-table">
@@ -949,6 +1082,15 @@
         a4Container.innerHTML = createMarkSheetHTML(1) + createMarkSheetHTML(2);
         document.getElementById('sheet-1').classList.add('mobile-active-sheet');
 
+        // Prevent Enter key from creating manual linebreaks inside the Course textarea
+        a4Container.querySelectorAll('.course-textarea').forEach(ta => {
+            ta.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        });
+
         // Silently mirror all fields from Sheet 1 (ORIGINAL) to Sheet 2 (DUPLICATE)
         function syncAllFromOriginalToDuplicate() {
             const sheet1Fields = document.querySelectorAll('[data-sheet="1"]');
@@ -959,16 +1101,18 @@
                     el2.value = el1.value;
                 }
             });
+            autoFitAllHeaderFields();
         }
 
         // Live input handler: converts Figures -> Words per student row; leaves TOTAL row untouched
         function handleFieldChange(e) {
             const target = e.target;
-            if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT') return;
+            if (target.tagName !== 'INPUT' && target.tagName !== 'SELECT' && target.tagName !== 'TEXTAREA') return;
 
             const sheetIndex = target.getAttribute('data-sheet');
             const row = target.getAttribute('data-row');
             const col = target.getAttribute('data-col');
+            const field = target.getAttribute('data-field');
 
             // Convert student rows (0 to 24); do not auto-sum or fill TOTAL row (row 25)
             if (col === 'fig' && row !== null && parseInt(row, 10) < TOTAL_ROWS) {
@@ -976,6 +1120,10 @@
                 if (wordsEl) {
                     wordsEl.value = figuresToWords(target.value);
                 }
+            }
+
+            if (field === 'exam-name' || field === 'course') {
+                autoFitAllHeaderFields();
             }
 
             // Whenever ORIGINAL is edited, silently mirror to DUPLICATE
@@ -1016,8 +1164,8 @@
 
         // Build dynamic filename from QP CODE + DATE -> [QP_CODE]_[DATE]
         function getDynamicFileName() {
-            const qpInput = document.querySelector('input[data-sheet="1"][data-field="qp-code"]');
-            const dateInput = document.querySelector('input[data-sheet="1"][data-field="date"]');
+            const qpInput = document.querySelector('[data-sheet="1"][data-field="qp-code"]');
+            const dateInput = document.querySelector('[data-sheet="1"][data-field="date"]');
 
             const rawQp = (qpInput && qpInput.value.trim()) ? qpInput.value.trim() : 'QPCODE';
             const rawDate = (dateInput && dateInput.value.trim()) ? dateInput.value.trim() : 'DATE';
@@ -1026,12 +1174,6 @@
             const cleanDate = rawDate.replace(/[^a-zA-Z0-9_-]/g, '-');
 
             return `${cleanQp}_${cleanDate}`;
-        }
-
-        // Helper to read a field value from sheet 1 or sheet 2
-        function getSheetVal(sheetIndex, fieldName) {
-            const el = document.querySelector(`[data-sheet="${sheetIndex}"][data-field="${fieldName}"]`);
-            return el ? el.value.trim() : '';
         }
 
         // Print A4 Page (Guaranteed 1 Page)
@@ -1046,348 +1188,134 @@
         }
 
         /*
-         * Direct High-Resolution A4 Canvas + jsPDF Renderer
-         * Draws BOTH ORIGINAL (left) and DUPLICATE (right) side-by-side on 1 single A4 page.
+         * Builds an off-screen, unscaled A4 clone where every <input>, <textarea>, and <select>
+         * is converted into a crisp static <div>/<span> with auto-fitted font sizes so html2canvas
+         * NEVER clips long Course or Semester names and always renders both ORIGINAL & DUPLICATE side-by-side.
          */
-        function renderSingleSheetOnCanvas(ctx, sheetIndex, originX, originY, colW) {
-            ctx.fillStyle = '#000000';
-            ctx.strokeStyle = '#000000';
-
-            let y = originY;
-
-            // 1. Top Row: QP CODE on left, ORIGINAL / DUPLICATE on right
-            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'alphabetic';
-            ctx.fillText('QP CODE :', originX, y + 11);
-
-            const qpLineStart = originX + 60;
-            const qpLineEnd = originX + 180;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(qpLineStart, y + 13);
-            ctx.lineTo(qpLineEnd, y + 13);
-            ctx.stroke();
-
-            const qpVal = getSheetVal(sheetIndex, 'qp-code');
-            if (qpVal) {
-                ctx.fillText(qpVal, qpLineStart + 3, y + 11);
-            }
-
-            const badgeText = sheetIndex === 1 ? 'ORIGINAL' : 'DUPLICATE';
-            ctx.textAlign = 'right';
-            ctx.fillText(badgeText, originX + colW, y + 11);
-
-            y += 23;
-
-            // 2. Centered Header: UNIVERSITY OF CALICUT / MARK SHEET
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 15px Arial, Helvetica, sans-serif';
-            ctx.fillText('UNIVERSITY OF CALICUT', originX + colW / 2, y + 10);
-
-            y += 18;
-            ctx.font = 'bold 14px Arial, Helvetica, sans-serif';
-            ctx.fillText('MARK SHEET', originX + colW / 2, y + 8);
-
-            y += 20;
-
-            // 3. Examinations Line: __________Examinations__November__2026
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-
-            const examLabel = 'Examinations';
-            const examLabelW = ctx.measureText(examLabel).width;
-            const yearPrefix = '20';
-            const yearPrefixW = ctx.measureText(yearPrefix).width;
-
-            const yearLineW = 22;
-            const midLineW = 64; // Wide enough so "November" never clips
-            const prefixLineW = colW - examLabelW - midLineW - yearPrefixW - yearLineW - 4;
-
-            let curX = originX;
-            // Prefix line before Examinations
-            ctx.beginPath();
-            ctx.moveTo(curX, y + 12);
-            ctx.lineTo(curX + prefixLineW, y + 12);
-            ctx.stroke();
-
-            const examNameVal = getSheetVal(sheetIndex, 'exam-name');
-            if (examNameVal) {
-                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(examNameVal, curX + prefixLineW / 2, y + 10);
-            }
-
-            curX += prefixLineW + 1;
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(examLabel, curX, y + 11);
-            curX += examLabelW + 1;
-
-            // Middle line between Examinations and 20 (for "November")
-            ctx.beginPath();
-            ctx.moveTo(curX, y + 12);
-            ctx.lineTo(curX + midLineW, y + 12);
-            ctx.stroke();
-
-            const examSessionVal = getSheetVal(sheetIndex, 'exam-session');
-            if (examSessionVal) {
-                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(examSessionVal, curX + midLineW / 2, y + 10);
-            }
-
-            curX += midLineW + 1;
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(yearPrefix, curX, y + 11);
-            curX += yearPrefixW + 1;
-
-            // Year suffix line after 20
-            ctx.beginPath();
-            ctx.moveTo(curX, y + 12);
-            ctx.lineTo(originX + colW, y + 12);
-            ctx.stroke();
-
-            const examYearVal = getSheetVal(sheetIndex, 'exam-year');
-            if (examYearVal) {
-                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(examYearVal, curX + 2, y + 10);
-            }
-
-            y += 18;
-
-            // 4. Course Line: Course__________________________
-            ctx.font = 'normal 11.5px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            const courseLabel = 'Course';
-            ctx.fillText(courseLabel, originX, y + 11);
-            const courseLabelW = ctx.measureText(courseLabel).width;
-
-            ctx.beginPath();
-            ctx.moveTo(originX + courseLabelW + 2, y + 12);
-            ctx.lineTo(originX + colW, y + 12);
-            ctx.stroke();
-
-            const courseVal = getSheetVal(sheetIndex, 'course');
-            if (courseVal) {
-                ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-                ctx.fillText(courseVal, originX + courseLabelW + 6, y + 10);
-            }
-
-            y += 16;
-
-            // 5. Main Table (2 Header Rows + 25 Student Rows + 1 TOTAL Row)
-            const tableTop = y;
-            const regColW = Math.round(colW * 0.38);
-            const figColW = Math.round(colW * 0.20);
-            const wordsColW = colW - regColW - figColW;
-
-            const headerRowH = 20;
-            const dataRowH = 24;
-            const totalRowsCount = TOTAL_ROWS + 1; // 25 student rows + 1 TOTAL row
-            const tableH = (headerRowH * 2) + (dataRowH * totalRowsCount);
-
-            // Outer Table Border
-            ctx.lineWidth = 1.4;
-            ctx.strokeRect(originX, tableTop, colW, tableH);
-
-            // Vertical Column Dividers
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(originX + regColW, tableTop);
-            ctx.lineTo(originX + regColW, tableTop + tableH);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(originX + regColW + figColW, tableTop + headerRowH);
-            ctx.lineTo(originX + regColW + figColW, tableTop + tableH);
-            ctx.stroke();
-
-            // Horizontal divider between Marks and Figures/in words
-            ctx.beginPath();
-            ctx.moveTo(originX + regColW, tableTop + headerRowH);
-            ctx.lineTo(originX + colW, tableTop + headerRowH);
-            ctx.stroke();
-
-            // Horizontal divider below Header Row 2
-            ctx.beginPath();
-            ctx.moveTo(originX, tableTop + headerRowH * 2);
-            ctx.lineTo(originX + colW, tableTop + headerRowH * 2);
-            ctx.stroke();
-
-            // Header Texts
-            ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('Register Number', originX + regColW / 2, tableTop + headerRowH);
-            ctx.fillText('Marks', originX + regColW + (figColW + wordsColW) / 2, tableTop + headerRowH / 2);
-            ctx.fillText('Figures', originX + regColW + figColW / 2, tableTop + headerRowH + headerRowH / 2);
-            ctx.fillText('in words', originX + regColW + figColW + wordsColW / 2, tableTop + headerRowH + headerRowH / 2);
-
-            // 25 Student Rows + 1 TOTAL Row
-            let rowY = tableTop + headerRowH * 2;
-            for (let r = 0; r < TOTAL_ROWS; r++) {
-                ctx.beginPath();
-                ctx.moveTo(originX, rowY + dataRowH);
-                ctx.lineTo(originX + colW, rowY + dataRowH);
-                ctx.stroke();
-
-                const regVal = getSheetVal(sheetIndex, `reg-${r}`).toUpperCase();
-                const figVal = getSheetVal(sheetIndex, `fig-${r}`).toUpperCase();
-                const wordsVal = getSheetVal(sheetIndex, `words-${r}`).toUpperCase();
-
-                const centerY = rowY + dataRowH / 2 + 0.5;
-
-                if (regVal) {
-                    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(regVal, originX + regColW / 2, centerY);
-                }
-                if (figVal) {
-                    ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(figVal, originX + regColW + figColW / 2, centerY);
-                }
-                if (wordsVal) {
-                    ctx.font = 'bold 10px Arial, Helvetica, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(wordsVal, originX + regColW + figColW + wordsColW / 2, centerY);
-                }
-
-                rowY += dataRowH;
-            }
-
-            // TOTAL Row
-            const totalCenterY = rowY + dataRowH / 2 + 0.5;
-            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('TOTAL', originX + 5, totalCenterY);
-
-            const totalFigVal = getSheetVal(sheetIndex, 'total-fig').toUpperCase();
-            const totalWordsVal = getSheetVal(sheetIndex, 'total-words').toUpperCase();
-            if (totalFigVal) {
-                ctx.textAlign = 'center';
-                ctx.fillText(totalFigVal, originX + regColW + figColW / 2, totalCenterY);
-            }
-            if (totalWordsVal) {
-                ctx.font = 'bold 10px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(totalWordsVal, originX + regColW + figColW + wordsColW / 2, totalCenterY);
-            }
-
-            y = tableTop + tableH + 14;
-
-            // 6. Bottom Signature Block
-            ctx.textBaseline = 'alphabetic';
-            const labelColW = Math.round(colW * 0.31);
-            const colonColW = Math.round(colW * 0.04);
-            const nameColW = Math.round(colW * 0.35);
-            const signColW = colW - labelColW - colonColW - nameColW;
-
-            // Underlined Name and Signature headers
-            ctx.font = 'normal 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'center';
-            const nameHeaderX = originX + labelColW + colonColW + nameColW / 2;
-            const signHeaderX = originX + labelColW + colonColW + nameColW + signColW / 2;
-
-            ctx.fillText('Name', nameHeaderX, y);
-            const nameW = ctx.measureText('Name').width;
-            ctx.beginPath();
-            ctx.moveTo(nameHeaderX - nameW / 2, y + 2);
-            ctx.lineTo(nameHeaderX + nameW / 2, y + 2);
-            ctx.stroke();
-
-            ctx.fillText('Signature', signHeaderX, y);
-            const signW = ctx.measureText('Signature').width;
-            ctx.beginPath();
-            ctx.moveTo(signHeaderX - signW / 2, y + 2);
-            ctx.lineTo(signHeaderX + signW / 2, y + 2);
-            ctx.stroke();
-
-            const sigRows = [
-                { label: 'Addl. Examiner', field: 'addl-examiner' },
-                { label: 'Chief Examiner', field: 'chief-examiner' },
-                { label: 'Chairman', field: 'chairman' }
-            ];
-
-            sigRows.forEach(item => {
-                y += 20;
-                ctx.font = 'italic bold 11px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(item.label, originX, y);
-
-                ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(':', originX + labelColW + colonColW / 2, y);
-
-                const val = getSheetVal(sheetIndex, item.field);
-                if (val) {
-                    ctx.font = 'normal 10.5px Arial, Helvetica, sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(val, originX + labelColW + colonColW + 4, y);
-                }
-            });
-
-            // Date & Session Row (Fits with plenty of bottom margin on Page 1)
-            y += 20;
-            ctx.font = 'italic bold 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('Date', originX, y);
-
-            ctx.font = 'bold 11px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(':', originX + labelColW + colonColW / 2, y);
-
-            const dateVal = getSheetVal(sheetIndex, 'date');
-            if (dateVal) {
-                ctx.font = 'normal 10.5px Arial, Helvetica, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(dateVal, originX + labelColW + colonColW + 4, y);
-            }
-
-            const sessionVal = getSheetVal(sheetIndex, 'session-fn-an') || 'FN / AN';
-            ctx.font = 'bold 10.5px Arial, Helvetica, sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillText(`SESSION : ${sessionVal}`, originX + colW, y);
-        }
-
-        // Export High-Resolution Side-by-Side 1-Page A4 PDF ([QPCODE]_[DATE].pdf)
-        function downloadPDFFile() {
+        async function downloadPDFFile() {
             const btn = document.getElementById('downloadPdfBtn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Generating PDF...';
             btn.disabled = true;
 
+            let offscreenWrapper = null;
+
             try {
                 syncAllFromOriginalToDuplicate();
 
-                // Create 3x Scale High-DPI A4 Canvas (794x1123 logical px)
-                const scaleFactor = 3;
-                const logicalW = 794;
-                const logicalH = 1123;
+                // Create an off-screen wrapper with fixed A4 geometry (immune to mobile zoom/scaling)
+                offscreenWrapper = document.createElement('div');
+                offscreenWrapper.style.position = 'fixed';
+                offscreenWrapper.style.left = '-9999px';
+                offscreenWrapper.style.top = '0';
+                offscreenWrapper.style.width = '794px';
+                offscreenWrapper.style.height = '1123px';
+                offscreenWrapper.style.backgroundColor = '#ffffff';
+                offscreenWrapper.style.zIndex = '-1';
 
-                const canvas = document.createElement('canvas');
-                canvas.width = logicalW * scaleFactor;
-                canvas.height = logicalH * scaleFactor;
+                const clonePage = a4Container.cloneNode(true);
+                clonePage.style.transform = 'none';
+                clonePage.style.width = '794px';
+                clonePage.style.minWidth = '794px';
+                clonePage.style.height = '1123px';
+                clonePage.style.padding = '20px 24px';
+                clonePage.style.boxShadow = 'none';
+                clonePage.style.display = 'grid';
+                clonePage.style.gridTemplateColumns = '1fr 1fr';
+                clonePage.style.columnGap = '24px';
 
-                const ctx = canvas.getContext('2d');
-                ctx.scale(scaleFactor, scaleFactor);
+                // Ensure both sheets are visible inside the clone even if mobile Easy Entry mode is active
+                clonePage.querySelectorAll('.marksheet').forEach(sheet => {
+                    sheet.style.display = 'flex';
+                });
 
-                // White A4 Page Background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, logicalW, logicalH);
+                offscreenWrapper.appendChild(clonePage);
+                document.body.appendChild(offscreenWrapper);
 
-                // Page Padding & 2-Column Geometry
-                const padX = 24;
-                const padY = 22;
-                const colGap = 24;
-                const colW = (logicalW - (padX * 2) - colGap) / 2;
+                // Replace all <input>, <textarea>, and <select> elements in the clone with crisp print-safe divs
+                const origControls = a4Container.querySelectorAll('input, textarea, select');
+                const cloneControls = clonePage.querySelectorAll('input, textarea, select');
 
-                // Draw Left Column (ORIGINAL) and Right Column (DUPLICATE)
-                renderSingleSheetOnCanvas(ctx, 1, padX, padY, colW);
-                renderSingleSheetOnCanvas(ctx, 2, padX + colW + colGap, padY, colW);
+                cloneControls.forEach((cloneEl, idx) => {
+                    const origEl = origControls[idx];
+                    const val = origEl ? origEl.value : '';
+                    const field = cloneEl.getAttribute('data-field') || '';
+                    const span = document.createElement('div');
+
+                    // Copy computed font size from the live auto-fitted element
+                    const computed = window.getComputedStyle(origEl);
+                    span.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                    span.style.fontSize = computed.fontSize;
+                    span.style.fontWeight = computed.fontWeight;
+                    span.style.color = '#000000';
+                    span.style.textAlign = computed.textAlign;
+                    span.style.textTransform = computed.textTransform;
+                    span.style.lineHeight = '1.15';
+                    span.style.boxSizing = 'border-box';
+
+                    if (field === 'course') {
+                        span.style.width = '100%';
+                        span.style.minHeight = '15px';
+                        span.style.padding = '0 2px 1px 2px';
+                        span.style.fontWeight = '600';
+                        span.style.whiteSpace = origEl.classList.contains('multiline') ? 'normal' : 'nowrap';
+                        span.style.wordBreak = 'break-word';
+                        span.textContent = val;
+                    } else if (field === 'exam-name') {
+                        span.style.flex = '1 1 auto';
+                        span.style.minWidth = '0';
+                        span.style.borderBottom = '1.2px solid #000000';
+                        span.style.minHeight = '15px';
+                        span.style.padding = '0 2px 1px 2px';
+                        span.style.textAlign = 'center';
+                        span.style.fontWeight = '600';
+                        span.style.whiteSpace = 'nowrap';
+                        span.textContent = val;
+                    } else if (cloneEl.classList.contains('line-input') || cloneEl.classList.contains('qp-input')) {
+                        span.style.width = computed.width;
+                        span.style.borderBottom = '1.2px solid #000000';
+                        span.style.minHeight = '15px';
+                        span.style.padding = '0 2px 1px 2px';
+                        span.style.whiteSpace = 'nowrap';
+                        span.textContent = val;
+                    } else if (cloneEl.classList.contains('cell-input')) {
+                        span.style.width = '100%';
+                        span.style.height = '100%';
+                        span.style.display = 'flex';
+                        span.style.alignItems = 'center';
+                        span.style.justifyContent = 'center';
+                        span.style.padding = '0 2px';
+                        span.textContent = val;
+                    } else if (cloneEl.classList.contains('sig-input') || cloneEl.classList.contains('date-input')) {
+                        span.style.width = computed.width;
+                        span.style.minHeight = '15px';
+                        span.style.padding = '0 2px';
+                        span.style.whiteSpace = 'nowrap';
+                        span.textContent = val;
+                    } else if (cloneEl.classList.contains('session-select')) {
+                        span.style.display = 'inline-block';
+                        span.style.fontWeight = '700';
+                        span.style.fontSize = '10.5px';
+                        span.textContent = val || 'FN / AN';
+                    }
+
+                    cloneEl.parentNode.replaceChild(span, cloneEl);
+                });
+
+                // Hide the center dashed screen guide line inside the PDF clone
+                const styleTag = document.createElement('style');
+                styleTag.textContent = `#${clonePage.id}::after { display: none !important; }`;
+                offscreenWrapper.appendChild(styleTag);
+
+                const canvas = await html2canvas(clonePage, {
+                    scale: 3,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    width: 794,
+                    height: 1123,
+                    windowWidth: 794,
+                    windowHeight: 1123
+                });
 
                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
                 const { jsPDF } = window.jspdf;
@@ -1403,6 +1331,9 @@
                 console.error('PDF export error:', err);
                 printMarkSheet();
             } finally {
+                if (offscreenWrapper && offscreenWrapper.parentNode) {
+                    offscreenWrapper.parentNode.removeChild(offscreenWrapper);
+                }
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -1426,6 +1357,7 @@
                 tabPreview.classList.add('active');
             }
             applyMobileScaling();
+            autoFitAllHeaderFields();
         }
 
         function selectMobileSheet(sheetNum) {
@@ -1445,6 +1377,7 @@
                 b1.classList.remove('active');
                 b2.classList.add('active');
             }
+            autoFitAllHeaderFields();
         }
 
         function applyMobileScaling() {
@@ -1463,16 +1396,23 @@
             if (availableWidth < a4PixelWidth) {
                 const scale = availableWidth / a4PixelWidth;
                 a4Container.style.transform = `scale(${scale})`;
-                viewport.style.height = `${Math.ceil(1050 * scale) + 12}px`;
+                viewport.style.height = `${Math.ceil(1065 * scale) + 12}px`;
             } else {
                 a4Container.style.transform = 'none';
                 viewport.style.height = 'auto';
             }
         }
 
-        window.addEventListener('resize', applyMobileScaling);
-        window.addEventListener('DOMContentLoaded', applyMobileScaling);
+        window.addEventListener('resize', () => {
+            applyMobileScaling();
+            autoFitAllHeaderFields();
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            applyMobileScaling();
+            autoFitAllHeaderFields();
+        });
         applyMobileScaling();
+        autoFitAllHeaderFields();
 
         // Modal Controls for Clear All
         function openClearModal() {
@@ -1484,7 +1424,7 @@
         }
 
         function confirmClearAll() {
-            const allInputs = a4Container.querySelectorAll('input');
+            const allInputs = a4Container.querySelectorAll('input, textarea');
             allInputs.forEach(inp => {
                 const field = inp.getAttribute('data-field');
                 if (field === 'exam-session') {
@@ -1497,6 +1437,7 @@
             });
             const allSelects = a4Container.querySelectorAll('select');
             allSelects.forEach(sel => { sel.selectedIndex = 0; });
+            autoFitAllHeaderFields();
             closeClearModal();
         }
     </script>
