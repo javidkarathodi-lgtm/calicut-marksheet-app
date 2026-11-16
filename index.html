@@ -598,21 +598,49 @@
   <p style="margin-top:0; margin-bottom:12px; text-align:center; font-size:11.5px; color:#64748b; font-weight:600;">💻 Designed & Developed by <a href="https://in.linkedin.com/in/javidkarathodi" target="_blank" rel="noopener noreferrer" style="color:#2563eb; font-weight:800; text-decoration:underline;">Javid Karathodi</a></p>
   <div class="mobile-meta-grid">
     <div style="display:flex; gap:8px;">
-      <select id="mob-sem-select" style="flex:2;" onchange="applyExamPreset(this.value)">
+      <select id="mob-sem-select" style="flex:1.5;" onchange="applyExamPreset(this.value)">
         <option value="First Semester FYUG">First Semester FYUG</option>
         <option value="Third Semester FYUG">Third Semester FYUG</option>
         <option value="Fifth Semester FYUG" selected>Fifth Semester FYUG</option>
         <option value="Seventh Semester FYUG">Seventh Semester FYUG</option>
       </select>
-      <input type="number" id="mob-year-input" style="flex:1; text-align:center;" placeholder="Year" oninput="applyYear(this.value)">
+      <input type="text" id="mob-month-input" style="flex:1; text-align:center;" placeholder="Month" value="November" oninput="syncFromMobileMeta()">
+      <input type="number" id="mob-year-input" style="width:78px; text-align:center;" placeholder="Year" oninput="applyYear(this.value)">
     </div>
     <div style="display:flex; gap:8px;">
-      <input type="text" id="mob-qp" placeholder="QP Code (e.g. D153559)" oninput="syncFromMobileMeta()">
-      <input type="text" id="mob-date" placeholder="Date (DD-MM-YYYY)" oninput="syncFromMobileMeta()">
+      <input type="text" id="mob-qp" style="flex:1.2;" placeholder="QP Code (e.g. D153559)" oninput="syncFromMobileMeta()">
+      <input type="text" id="mob-date" style="flex:1;" placeholder="Date (DD-MM-YYYY)" oninput="syncFromMobileMeta()">
+      <select id="mob-session" style="width:88px; text-align:center; font-weight:800;" onchange="syncFromMobileMeta()">
+        <option value="FN">FN</option>
+        <option value="AN" selected>AN</option>
+      </select>
     </div>
     <input type="text" id="mob-course" placeholder="Course Code & Name" oninput="syncFromMobileMeta()">
   </div>
+
   <div id="mobile-rows-list"></div>
+
+  <!-- Examiner & Bottom Details in Mobile View -->
+  <div class="mobile-meta-grid" style="margin-top: 14px; margin-bottom: 0;">
+    <div style="font-weight: 800; font-size: 13px; color: #1e293b; margin-bottom: 2px;">✍️ Examiner & Session Details</div>
+    <input type="text" id="mob-addl" placeholder="Addl. Examiner Name" oninput="syncFromMobileMeta()">
+    <input type="text" id="mob-chief" placeholder="Chief Examiner Name" oninput="syncFromMobileMeta()">
+    <input type="text" id="mob-chair" placeholder="Chairman Name" oninput="syncFromMobileMeta()">
+    <div style="display:flex; gap:8px; align-items:center;">
+      <div style="flex:1;">
+        <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Date</label>
+        <input type="text" id="mob-date-bottom" placeholder="DD-MM-YYYY" oninput="syncMobileDateBottom(this.value)">
+      </div>
+      <div style="width:110px;">
+        <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">SESSION</label>
+        <select id="mob-session-bottom" style="font-weight:800;" onchange="syncMobileSessionBottom(this.value)">
+          <option value="FN">FN</option>
+          <option value="AN" selected>AN</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="downloadPDF()" style="margin-top:6px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:800; font-size:14px; cursor:pointer; width:100%; box-shadow:0 4px 10px rgba(37,99,235,0.3);">📥 Download Mark Sheet PDF</button>
+  </div>
 </div>
 
 <!-- A4 Side-by-Side View -->
@@ -996,6 +1024,7 @@
       fitAllHeaders();
     } else if (field === 'examMonth') {
       document.getElementById('exam-month-dup').value = val;
+      document.getElementById('mob-month-input').value = val;
     } else if (field === 'examYr') {
       document.getElementById('exam-yr-dup').value = val;
       if (val.length === 2) {
@@ -1008,15 +1037,21 @@
       fitAllHeaders();
     } else if (field === 'addl') {
       document.getElementById('addl-dup').value = val;
+      document.getElementById('mob-addl').value = val;
     } else if (field === 'chief') {
       document.getElementById('chief-dup').value = val;
+      document.getElementById('mob-chief').value = val;
     } else if (field === 'chair') {
       document.getElementById('chair-dup').value = val;
+      document.getElementById('mob-chair').value = val;
     } else if (field === 'date') {
       document.getElementById('date-dup').value = val;
       document.getElementById('mob-date').value = val;
+      document.getElementById('mob-date-bottom').value = val;
     } else if (field === 'session') {
       document.getElementById('session-dup').value = val;
+      document.getElementById('mob-session').value = val;
+      document.getElementById('mob-session-bottom').value = val;
     }
   }
 
@@ -1024,13 +1059,43 @@
     let qp = document.getElementById('mob-qp').value;
     let course = document.getElementById('mob-course').value;
     let dt = document.getElementById('mob-date').value;
+    let mth = document.getElementById('mob-month-input').value;
+    let sess = document.getElementById('mob-session').value;
+    let addl = document.getElementById('mob-addl').value;
+    let chief = document.getElementById('mob-chief').value;
+    let chair = document.getElementById('mob-chair').value;
+
     document.getElementById('qp-orig').value = qp;
     document.getElementById('qp-dup').value = qp;
     document.getElementById('course-orig').value = course;
     document.getElementById('course-dup').value = course;
+    document.getElementById('exam-month-orig').value = mth;
+    document.getElementById('exam-month-dup').value = mth;
     document.getElementById('date-orig').value = dt;
     document.getElementById('date-dup').value = dt;
+    document.getElementById('mob-date-bottom').value = dt;
+    document.getElementById('session-orig').value = sess;
+    document.getElementById('session-dup').value = sess;
+    document.getElementById('mob-session-bottom').value = sess;
+    document.getElementById('addl-orig').value = addl;
+    document.getElementById('addl-dup').value = addl;
+    document.getElementById('chief-orig').value = chief;
+    document.getElementById('chief-dup').value = chief;
+    document.getElementById('chair-orig').value = chair;
+    document.getElementById('chair-dup').value = chair;
     fitAllHeaders();
+  }
+
+  function syncMobileDateBottom(val) {
+    document.getElementById('mob-date').value = val;
+    document.getElementById('date-orig').value = val;
+    document.getElementById('date-dup').value = val;
+  }
+
+  function syncMobileSessionBottom(val) {
+    document.getElementById('mob-session').value = val;
+    document.getElementById('session-orig').value = val;
+    document.getElementById('session-dup').value = val;
   }
 
   function switchView(mode) {
@@ -1143,7 +1208,14 @@
     document.getElementById('session-dup').value = document.getElementById('session-orig').value;
     document.getElementById('mob-qp').value = document.getElementById('qp-orig').value;
     document.getElementById('mob-course').value = document.getElementById('course-orig').value;
+    document.getElementById('mob-month-input').value = document.getElementById('exam-month-orig').value;
     document.getElementById('mob-date').value = document.getElementById('date-orig').value;
+    document.getElementById('mob-date-bottom').value = document.getElementById('date-orig').value;
+    document.getElementById('mob-session').value = document.getElementById('session-orig').value;
+    document.getElementById('mob-session-bottom').value = document.getElementById('session-orig').value;
+    document.getElementById('mob-addl').value = document.getElementById('addl-orig').value;
+    document.getElementById('mob-chief').value = document.getElementById('chief-orig').value;
+    document.getElementById('mob-chair').value = document.getElementById('chair-orig').value;
     fitAllHeaders();
     window.addEventListener('resize', fitAllHeaders);
   };
