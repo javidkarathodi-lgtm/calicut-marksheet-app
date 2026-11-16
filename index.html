@@ -7,95 +7,183 @@
 <style>
   * { box-sizing: border-box; }
   body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #cbd5e1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    min-height: 100vh;
     margin: 0;
-    padding: 10px;
+    padding: 16px 10px 30px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     color: #000;
   }
+
+  /* Attractive Modern Dashboard Toolbar */
   .toolbar {
-    background: #1e293b;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     color: #fff;
-    padding: 12px 18px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    margin-bottom: 18px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
     flex-wrap: wrap;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    max-width: 960px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    max-width: 980px;
     width: 100%;
     justify-content: space-between;
   }
-  .toolbar button {
-    background: #3b82f6;
-    color: #fff;
-    border: none;
-    padding: 8px 13px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 13px;
+  .brand-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .toolbar button:hover { background: #2563eb; }
-  .toolbar button.clear-btn { background: #ef4444; }
-  .toolbar button.clear-btn:hover { background: #dc2626; }
-  .toolbar select.exam-preset, .toolbar input.year-box {
-    background: #0f172a;
+  .brand-icon {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+  }
+  .brand-title {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    color: #f8fafc;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: #94a3b8;
+    display: block;
+    font-weight: 500;
+  }
+
+  .toolbar-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .toolbar button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: #fff;
-    border: 1px solid #475569;
-    padding: 7px 10px;
-    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
     font-size: 13px;
-    font-weight: bold;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toolbar button:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }
+  .toolbar button.voice-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  .toolbar button.voice-btn.muted {
+    background: #475569;
+    color: #cbd5e1;
+  }
+  .toolbar button.clear-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+  .toolbar select.exam-preset, .toolbar input.year-box {
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #475569;
+    padding: 8px 11px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
     outline: none;
   }
   .toolbar input.year-box {
-    width: 72px;
+    width: 74px;
     text-align: center;
   }
 
   .view-switcher {
     display: flex;
     background: #0f172a;
-    padding: 3px;
-    border-radius: 6px;
+    padding: 4px;
+    border-radius: 9px;
+    border: 1px solid #334155;
   }
   .view-switcher button {
     background: transparent;
     color: #94a3b8;
     padding: 6px 12px;
-    font-size: 13px;
+    font-size: 12.5px;
+    border: none;
+    box-shadow: none;
   }
   .view-switcher button.active {
     background: #3b82f6;
     color: #fff;
   }
 
-  /* A4 Sheet Container */
+  /* Status Pill for Spoken Number */
+  .voice-toast {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    background: #0f172a;
+    color: #38bdf8;
+    border: 1px solid #0284c7;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    display: none;
+    z-index: 9999;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* A4 Sheet Container - Perfectly Balanced Full Height without Bottom Gap */
   .a4-sheet {
     background: #ffffff;
     width: 210mm;
+    height: 297mm;
     min-height: 297mm;
     max-height: 297mm;
-    padding: 8mm 10mm;
+    padding: 8mm 9.5mm;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+    border-radius: 4px;
     box-sizing: border-box;
     position: relative;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 11px;
   }
 
   .column {
     width: 48.6%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+
+  .top-block {
+    display: flex;
+    flex-direction: column;
   }
 
   .header-top {
@@ -115,8 +203,8 @@
   .qp-input {
     border: none;
     border-bottom: 1.5px solid #000;
-    width: 115px;
-    font-size: 11px;
+    width: 118px;
+    font-size: 11.5px;
     font-weight: bold;
     outline: none;
     background: transparent;
@@ -126,15 +214,15 @@
   .uni-title {
     text-align: center;
     font-weight: bold;
-    font-size: 13px;
-    margin: 1px 0;
+    font-size: 13.5px;
+    margin: 2px 0 1px 0;
     letter-spacing: 0.5px;
   }
   .mark-sheet-title {
     text-align: center;
     font-weight: bold;
-    font-size: 11.5px;
-    margin-bottom: 5px;
+    font-size: 12px;
+    margin-bottom: 6px;
     letter-spacing: 0.5px;
   }
 
@@ -142,7 +230,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     font-size: 10.5px;
     width: 100%;
     gap: 3px;
@@ -152,7 +240,7 @@
     border-bottom: 1.5px solid #000;
     outline: none;
     background: transparent;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: bold;
     padding: 1px 2px;
   }
@@ -162,7 +250,7 @@
     text-align: center;
   }
   .month-input {
-    width: 55px;
+    width: 56px;
     text-align: center;
   }
   .yr-input {
@@ -172,7 +260,7 @@
   .course-row {
     display: flex;
     align-items: flex-end;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-size: 10.5px;
     width: 100%;
     gap: 4px;
@@ -184,51 +272,63 @@
     border-bottom: 1.5px solid #000;
     outline: none;
     background: transparent;
-    font-size: 9.5px;
+    font-size: 9.8px;
     font-weight: bold;
     padding: 1px 2px;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  /* Table styling */
+  /* Table styling - Expanded Row Heights (27.5px) to Fill the Page Naturally */
   table {
     width: 100%;
     border-collapse: collapse;
     border: 1.5px solid #000;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   th, td {
     border: 1px solid #000;
-    padding: 0px 3px;
+    padding: 0px 4px;
     text-align: center;
-    height: 21px;
-    font-size: 10.5px;
+    height: 27.5px;
+    font-size: 11px;
   }
   th {
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
     font-weight: bold;
-    height: 19px;
+    height: 22px;
+    font-size: 10.5px;
   }
   td input {
     width: 100%;
+    height: 100%;
     border: none;
     background: transparent;
     text-align: center;
     outline: none;
-    font-size: 10.5px;
+    font-size: 11.5px;
     padding: 0;
     font-family: inherit;
+    transition: background-color 0.15s;
+  }
+  td input:focus {
+    background-color: #eff6ff;
   }
   td input.reg-input {
     text-align: left;
-    padding-left: 3px;
+    padding-left: 4px;
     font-weight: bold;
+    font-size: 11px;
+  }
+  td input.fig-input {
+    font-weight: bold;
+    font-size: 12px;
+    color: #0f172a;
   }
   td input.words-input {
     text-align: left;
-    padding-left: 3px;
-    font-size: 9.5px;
+    padding-left: 5px;
+    font-size: 10px;
     font-weight: bold;
   }
 
@@ -236,31 +336,35 @@
     font-weight: bold;
     text-align: left;
     padding-left: 6px;
-    height: 21px;
+    height: 27.5px;
+    background-color: #f8fafc;
+  }
+
+  .bottom-block {
+    margin-top: 2px;
   }
 
   .signature-section {
-    font-size: 10px;
-    margin-top: 2px;
-    margin-bottom: 3px;
+    font-size: 10.5px;
+    margin-bottom: 4px;
   }
   .sig-header {
     display: flex;
     justify-content: flex-end;
-    gap: 45px;
-    padding-right: 12px;
-    margin-bottom: 2px;
+    gap: 48px;
+    padding-right: 14px;
+    margin-bottom: 4px;
     font-weight: bold;
     text-decoration: underline;
-    font-size: 9.5px;
+    font-size: 10px;
   }
   .sig-row {
     display: flex;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
   }
   .sig-label {
-    width: 78px;
+    width: 82px;
     font-weight: bold;
   }
   .sig-colon {
@@ -271,38 +375,39 @@
     border: none;
     border-bottom: 1px dotted #000;
     flex: 1;
-    font-size: 10px;
+    font-size: 10.5px;
+    font-weight: bold;
     outline: none;
     background: transparent;
-    padding: 1px 2px;
+    padding: 2px 3px;
   }
 
   .bottom-date-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: bold;
-    margin-top: 2px;
-    padding-top: 2px;
+    margin-top: 4px;
+    padding-top: 4px;
   }
   .bottom-date-row input {
     border: none;
-    border-bottom: 1px solid #000;
-    width: 78px;
+    border-bottom: 1.5px solid #000;
+    width: 82px;
     text-align: center;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: bold;
     outline: none;
     background: transparent;
   }
   .session-select {
     border: none;
-    border-bottom: 1px solid #000;
+    border-bottom: 1.5px solid #000;
     background: transparent;
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: bold;
-    padding: 0 2px;
+    padding: 0 4px;
     outline: none;
     cursor: pointer;
   }
@@ -310,28 +415,30 @@
   /* Mobile Easy Entry View */
   .mobile-entry-container {
     display: none;
-    background: #fff;
+    background: #ffffff;
     width: 100%;
-    max-width: 600px;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-width: 620px;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
   }
   .mobile-meta-grid {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 14px;
     background: #f1f5f9;
-    padding: 10px;
-    border-radius: 6px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
   }
   .mobile-meta-grid input, .mobile-meta-grid select {
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    font-size: 13px;
+    border-radius: 6px;
+    font-size: 13.5px;
     width: 100%;
+    font-weight: 600;
   }
   .mobile-row {
     display: flex;
@@ -339,25 +446,31 @@
     margin-bottom: 8px;
     align-items: center;
     background: #f8fafc;
-    padding: 8px;
-    border-radius: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
     border: 1px solid #e2e8f0;
   }
   .mobile-row span {
-    font-weight: bold;
+    font-weight: 800;
     font-size: 13px;
-    width: 24px;
+    width: 26px;
+    color: #475569;
   }
   .mobile-row input {
-    padding: 8px;
+    padding: 9px;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
     outline: none;
+    font-weight: 600;
+  }
+  .mobile-row input:focus {
+    border-color: #2563eb;
+    background: #eff6ff;
   }
   .mob-reg { flex: 1.3; }
   .mob-mark { flex: 0.7; text-align: center; }
-  .mob-words { flex: 1.4; font-weight: bold; color: #1e293b; font-size: 11px; }
+  .mob-words { flex: 1.4; font-weight: 800; color: #0f172a; font-size: 11.5px; padding-left: 4px; }
 
   @page {
     size: A4 portrait;
@@ -373,16 +486,16 @@
       height: 297mm !important;
       overflow: hidden !important;
     }
-    .toolbar { display: none !important; }
-    .mobile-entry-container { display: none !important; }
+    .toolbar, .voice-toast, .mobile-entry-container { display: none !important; }
     .a4-sheet {
       display: flex !important;
       width: 210mm !important;
-      height: 295mm !important;
-      min-height: 295mm !important;
-      max-height: 295mm !important;
-      padding: 7mm 9mm !important;
+      height: 296mm !important;
+      min-height: 296mm !important;
+      max-height: 296mm !important;
+      padding: 7.5mm 9mm !important;
       box-shadow: none !important;
+      border-radius: 0 !important;
       margin: 0 !important;
       page-break-after: avoid !important;
       page-break-inside: avoid !important;
@@ -402,29 +515,39 @@
 </datalist>
 
 <div class="toolbar">
-  <div style="font-weight: bold; font-size: 14px;">🏛️ Calicut University Mark Sheet</div>
-  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+  <div class="brand-box">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <span class="brand-title">University of Calicut</span>
+      <span class="brand-sub">FYUGP Interactive Mark Sheet Portal (Original & Duplicate)</span>
+    </div>
+  </div>
+
+  <div class="toolbar-controls">
     <select id="preset-selector" class="exam-preset" onchange="applyExamPreset(this.value)">
       <option value="First Semester FYUG">First Semester FYUG</option>
       <option value="Third Semester FYUG">Third Semester FYUG</option>
       <option value="Fifth Semester FYUG" selected>Fifth Semester FYUG</option>
       <option value="Seventh Semester FYUG">Seventh Semester FYUG</option>
     </select>
-    <input type="number" id="toolbar-year" class="year-box" title="Exam Year (Auto-updates every year)" min="2024" max="2099" oninput="applyYear(this.value)">
-  </div>
-  <div class="view-switcher">
-    <button id="btn-a4" class="active" onclick="switchView('a4')">Fit A4 to Screen (2-in-1)</button>
-    <button id="btn-mob" onclick="switchView('mobile')">Easy Entry Zoom</button>
-  </div>
-  <div style="display: flex; gap: 8px;">
+    <input type="number" id="toolbar-year" class="year-box" title="Exam Year" min="2024" max="2099" oninput="applyYear(this.value)">
+
+    <div class="view-switcher">
+      <button id="btn-a4" class="active" onclick="switchView('a4')">📄 A4 Sheet</button>
+      <button id="btn-mob" onclick="switchView('mobile')">📱 Mobile Zoom</button>
+    </div>
+
+    <button id="btn-voice" class="voice-btn" onclick="toggleVoice()" title="Reads out entered marks aloud">🔊 Voice: ON</button>
     <button onclick="downloadPDF()">📥 Download PDF</button>
     <button class="clear-btn" onclick="clearAll()">🗑️ Clear</button>
   </div>
 </div>
 
+<div id="voiceToast" class="voice-toast">🔊 Speaking: <span id="voiceToastText"></span></div>
+
 <!-- Mobile Easy Entry View -->
 <div id="mobileView" class="mobile-entry-container">
-  <h3 style="margin-top:0; text-align:center; color:#1e293b;">📱 Easy Entry Mode</h3>
+  <h3 style="margin-top:0; text-align:center; color:#1e293b;">📱 Mobile Easy Entry Mode</h3>
   <div class="mobile-meta-grid">
     <div style="display:flex; gap:8px;">
       <select id="mob-sem-select" style="flex:2;" onchange="applyExamPreset(this.value)">
@@ -433,7 +556,7 @@
         <option value="Fifth Semester FYUG" selected>Fifth Semester FYUG</option>
         <option value="Seventh Semester FYUG">Seventh Semester FYUG</option>
       </select>
-      <input type="number" id="mob-year-input" style="flex:1; text-align:center; font-weight:bold;" placeholder="Year" oninput="applyYear(this.value)">
+      <input type="number" id="mob-year-input" style="flex:1; text-align:center;" placeholder="Year" oninput="applyYear(this.value)">
     </div>
     <div style="display:flex; gap:8px;">
       <input type="text" id="mob-qp" placeholder="QP Code (e.g. D153559)" oninput="syncFromMobileMeta()">
@@ -448,7 +571,7 @@
 <div id="a4View" class="a4-sheet">
   <!-- ORIGINAL COLUMN -->
   <div class="column" id="col-orig">
-    <div>
+    <div class="top-block">
       <div class="header-top">
         <div class="qp-box">
           <span>QP CODE :</span>
@@ -478,8 +601,8 @@
             <th colspan="2">Marks</th>
           </tr>
           <tr>
-            <th style="width: 20%;">Figures</th>
-            <th style="width: 42%;">in words</th>
+            <th style="width: 22%;">Figures</th>
+            <th style="width: 40%;">in words</th>
           </tr>
         </thead>
         <tbody id="tbody-orig"></tbody>
@@ -493,7 +616,7 @@
       </table>
     </div>
 
-    <div>
+    <div class="bottom-block">
       <div class="signature-section">
         <div class="sig-header">
           <span>Name</span>
@@ -527,7 +650,7 @@
 
   <!-- DUPLICATE COLUMN -->
   <div class="column" id="col-dup">
-    <div>
+    <div class="top-block">
       <div class="header-top">
         <div class="qp-box">
           <span>QP CODE :</span>
@@ -557,8 +680,8 @@
             <th colspan="2">Marks</th>
           </tr>
           <tr>
-            <th style="width: 20%;">Figures</th>
-            <th style="width: 42%;">in words</th>
+            <th style="width: 22%;">Figures</th>
+            <th style="width: 40%;">in words</th>
           </tr>
         </thead>
         <tbody id="tbody-dup"></tbody>
@@ -572,7 +695,7 @@
       </table>
     </div>
 
-    <div>
+    <div class="bottom-block">
       <div class="signature-section">
         <div class="sig-header">
           <span>Name</span>
@@ -607,14 +730,74 @@
 
 <script>
   const numRows = 25;
+  let voiceEnabled = true;
+  let speechTimer = null;
+  let audioCtx = null;
+
   const measureCanvas = document.createElement('canvas');
   const measureCtx = measureCanvas.getContext('2d');
 
+  // Soft confirmation beep + Clear Voice Speech Synthesis when a mark is entered
+  function playKeyBeep() {
+    if (!voiceEnabled) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.06);
+    } catch (e) {}
+  }
+
+  function speakEnteredMark(val, wordsStr) {
+    if (!voiceEnabled || !val) return;
+    playKeyBeep();
+    if (speechTimer) clearTimeout(speechTimer);
+    speechTimer = setTimeout(() => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        // Speaks both the number and digits clearly, e.g., "25... TWO FIVE"
+        const utter = new SpeechSynthesisUtterance(`${val}`);
+        utter.lang = 'en-IN';
+        utter.rate = 1.05;
+        utter.pitch = 1.0;
+        window.speechSynthesis.speak(utter);
+
+        const toast = document.getElementById('voiceToast');
+        const toastText = document.getElementById('voiceToastText');
+        toastText.textContent = `${val} (${wordsStr})`;
+        toast.style.display = 'flex';
+        setTimeout(() => { toast.style.display = 'none'; }, 1600);
+      }
+    }, 320);
+  }
+
+  function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    const btn = document.getElementById('btn-voice');
+    if (voiceEnabled) {
+      btn.textContent = '🔊 Voice: ON';
+      btn.classList.remove('muted');
+      speakEnteredMark('Voice On', 'ENABLED');
+    } else {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      btn.textContent = '🔇 Voice: OFF';
+      btn.classList.add('muted');
+    }
+  }
+
   // Dynamic font-size scaler so long Course names or Semester names never get cut off
-  function autoFitInput(inputEl, maxFontPt = 10, minFontPt = 6.5) {
+  function autoFitInput(inputEl, maxFontPt = 10.2, minFontPt = 6.2) {
     if (!inputEl) return;
     const val = inputEl.value || '';
-    const availWidth = (inputEl.clientWidth || 260) - 6;
+    const availWidth = (inputEl.clientWidth || 265) - 6;
     let size = maxFontPt;
     while (size > minFontPt) {
       measureCtx.font = `bold ${size}px Arial, Helvetica, sans-serif`;
@@ -625,10 +808,10 @@
   }
 
   function fitAllHeaders() {
-    autoFitInput(document.getElementById('sem-orig'), 10.2, 7);
-    autoFitInput(document.getElementById('sem-dup'), 10.2, 7);
-    autoFitInput(document.getElementById('course-orig'), 9.8, 6.2);
-    autoFitInput(document.getElementById('course-dup'), 9.8, 6.2);
+    autoFitInput(document.getElementById('sem-orig'), 10.5, 7);
+    autoFitInput(document.getElementById('sem-dup'), 10.5, 7);
+    autoFitInput(document.getElementById('course-orig'), 10, 6.2);
+    autoFitInput(document.getElementById('course-dup'), 10, 6.2);
   }
 
   function applyExamPreset(semText) {
@@ -639,7 +822,6 @@
     fitAllHeaders();
   }
 
-  // Year helper: changing the year in toolbar or mobile view updates both Original & Duplicate
   function applyYear(fullYearStr) {
     let yrStr = String(fullYearStr).trim();
     let shortYr = yrStr.length === 4 ? yrStr.slice(2) : yrStr.slice(-2);
@@ -669,17 +851,17 @@
     for (let i = 1; i <= numRows; i++) {
       let trO = document.createElement('tr');
       trO.innerHTML = `
-        <td><input type="text" class="reg-input" id="orig-reg-${i}" oninput="syncRow(${i}, 'reg', this.value)"></td>
-        <td><input type="text" id="orig-fig-${i}" oninput="syncRow(${i}, 'fig', this.value)"></td>
-        <td><input type="text" class="words-input" id="orig-words-${i}" readonly></td>
+        <td><input type="text" class="reg-input" id="orig-reg-${i}" oninput="syncRow(${i}, 'reg', this.value)" onkeydown="handleEnterNav(event, ${i}, 'reg')"></td>
+        <td><input type="text" inputmode="numeric" class="fig-input" id="orig-fig-${i}" oninput="syncRow(${i}, 'fig', this.value)" onkeydown="handleEnterNav(event, ${i}, 'fig')"></td>
+        <td><input type="text" class="words-input" id="orig-words-${i}" readonly tabindex="-1"></td>
       `;
       tbodyOrig.appendChild(trO);
 
       let trD = document.createElement('tr');
       trD.innerHTML = `
-        <td><input type="text" class="reg-input" id="dup-reg-${i}" readonly></td>
-        <td><input type="text" id="dup-fig-${i}" readonly></td>
-        <td><input type="text" class="words-input" id="dup-words-${i}" readonly></td>
+        <td><input type="text" class="reg-input" id="dup-reg-${i}" readonly tabindex="-1"></td>
+        <td><input type="text" class="fig-input" id="dup-fig-${i}" readonly tabindex="-1"></td>
+        <td><input type="text" class="words-input" id="dup-words-${i}" readonly tabindex="-1"></td>
       `;
       tbodyDup.appendChild(trD);
 
@@ -688,10 +870,24 @@
       mobRow.innerHTML = `
         <span>${i}</span>
         <input type="text" class="mob-reg" id="mob-reg-${i}" placeholder="Reg No" oninput="updateFromMobile(${i}, 'reg', this.value)">
-        <input type="text" class="mob-mark" id="mob-fig-${i}" placeholder="Mark" oninput="updateFromMobile(${i}, 'fig', this.value)">
+        <input type="text" inputmode="numeric" class="mob-mark" id="mob-fig-${i}" placeholder="Mark" oninput="updateFromMobile(${i}, 'fig', this.value)">
         <div class="mob-words" id="mob-words-${i}"></div>
       `;
       mobList.appendChild(mobRow);
+    }
+  }
+
+  // Smooth Enter / Arrow key navigation down columns
+  function handleEnterNav(e, rowIdx, colType) {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIdx = rowIdx < numRows ? rowIdx + 1 : 1;
+      const nextEl = document.getElementById(`orig-${colType}-${nextIdx}`);
+      if (nextEl) nextEl.focus();
+    } else if (e.key === 'ArrowUp' && rowIdx > 1) {
+      e.preventDefault();
+      const prevEl = document.getElementById(`orig-${colType}-${rowIdx - 1}`);
+      if (prevEl) prevEl.focus();
     }
   }
 
@@ -708,6 +904,8 @@
       if (mobFig) mobFig.value = val;
       let mobW = document.getElementById(`mob-words-${rowIdx}`);
       if (mobW) mobW.innerText = words;
+
+      if (val !== "") speakEnteredMark(val, words);
     } else if (type === 'reg') {
       val = val.toUpperCase();
       document.getElementById(`orig-reg-${rowIdx}`).value = val;
@@ -727,6 +925,8 @@
       document.getElementById(`dup-fig-${rowIdx}`).value = val;
       document.getElementById(`dup-words-${rowIdx}`).value = words;
       document.getElementById(`mob-words-${rowIdx}`).innerText = words;
+
+      if (val !== "") speakEnteredMark(val, words);
     } else if (type === 'reg') {
       val = val.toUpperCase();
       document.getElementById(`mob-reg-${rowIdx}`).value = val;
@@ -823,6 +1023,7 @@
     clone.style.top = '-9999px';
     clone.style.left = '0';
     clone.style.transform = 'none';
+    clone.style.boxShadow = 'none';
     document.body.appendChild(clone);
 
     const origInputs = sheet.querySelectorAll('input, select');
@@ -870,9 +1071,8 @@
   window.onload = function() {
     initTables();
 
-    // Auto-detect current year and today's date so next year (2027, 2028...) it updates automatically without code edits!
     const now = new Date();
-    const currentFullYear = now.getFullYear(); // e.g., 2026 now, 2027 next year
+    const currentFullYear = now.getFullYear();
     const dd = String(now.getDate()).padStart(2, '0');
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const todayStr = `${dd}-${mm}-${currentFullYear}`;
