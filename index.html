@@ -651,7 +651,7 @@
       <div class="header-top">
         <div class="qp-box">
           <span>QP CODE :</span>
-          <input type="text" id="qp-orig" class="qp-input" value="D153559" oninput="syncMeta('qp', this.value)">
+          <input type="text" id="qp-orig" class="qp-input" value="" oninput="syncMeta('qp', this.value)">
         </div>
         <span>ORIGINAL</span>
       </div>
@@ -667,7 +667,7 @@
       </div>
       <div class="course-row">
         <span>Course</span>
-        <input type="text" id="course-orig" class="course-input" value="COM5EJ305(3)- CO-OPERATIVE THEORY AND PRACTICE" oninput="syncMeta('course', this.value)">
+        <input type="text" id="course-orig" class="course-input" value="" oninput="syncMeta('course', this.value)">
       </div>
 
       <table>
@@ -1119,8 +1119,24 @@
   }
 
   function clearAll() {
-    if (confirm("Are you sure you want to clear all entered student marks?")) {
+    if (confirm("Are you sure you want to clear all entered data?")) {
+      document.getElementById('qp-orig').value = '';
+      document.getElementById('qp-dup').value = '';
+      document.getElementById('mob-qp').value = '';
+      document.getElementById('course-orig').value = '';
+      document.getElementById('course-dup').value = '';
+      document.getElementById('mob-course').value = '';
+      document.getElementById('addl-orig').value = '';
+      document.getElementById('addl-dup').value = '';
+      document.getElementById('mob-addl').value = '';
+      document.getElementById('chief-orig').value = '';
+      document.getElementById('chief-dup').value = '';
+      document.getElementById('mob-chief').value = '';
+      document.getElementById('chair-orig').value = '';
+      document.getElementById('chair-dup').value = '';
+      document.getElementById('mob-chair').value = '';
       initTables();
+      fitAllHeaders();
     }
   }
 
