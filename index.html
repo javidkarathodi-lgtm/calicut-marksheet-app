@@ -178,7 +178,7 @@
     min-height: 297mm;
     max-height: 297mm;
     padding: 8mm 9.5mm;
-    display: flex;
+    display: none;
     justify-content: space-between;
     box-shadow: 0 20px 50px rgba(0,0,0,0.55);
     border-radius: 4px;
@@ -429,7 +429,7 @@
 
   /* Mobile Easy Entry View */
   .mobile-entry-container {
-    display: none;
+    display: block;
     background: #ffffff;
     width: 100%;
     max-width: 620px;
@@ -580,8 +580,8 @@
     <input type="number" id="toolbar-year" class="year-box" title="Exam Year" min="2024" max="2099" oninput="applyYear(this.value)">
 
     <div class="view-switcher">
-      <button id="btn-a4" class="active" onclick="switchView('a4')">📄 A4 Sheet</button>
-      <button id="btn-mob" onclick="switchView('mobile')">📱 Mobile Zoom</button>
+      <button id="btn-mob" class="active" onclick="switchView('mobile')">📱 Mobile Zoom</button>
+      <button id="btn-a4" onclick="switchView('a4')">📄 A4 Sheet</button>
     </div>
 
     <button id="btn-voice" class="voice-btn" onclick="toggleVoice()" title="Reads out entered marks aloud">🔊 Voice: ON</button>
@@ -1232,7 +1232,7 @@
     document.getElementById('mob-addl').value = document.getElementById('addl-orig').value;
     document.getElementById('mob-chief').value = document.getElementById('chief-orig').value;
     document.getElementById('mob-chair').value = document.getElementById('chair-orig').value;
-    fitAllHeaders();
+    switchView('mobile');
     window.addEventListener('resize', fitAllHeaders);
   };
 </script>
