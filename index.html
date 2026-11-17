@@ -931,7 +931,7 @@
     for (let i = 1; i <= numRows; i++) {
       let trO = document.createElement('tr');
       trO.innerHTML = `
-        <td><input type="text" class="reg-input" id="orig-reg-${i}" oninput="syncRow(${i}, 'reg', this.value)" onkeydown="handleEnterNav(event, ${i}, 'reg')"></td>
+        <td><input type="text" class="reg-input" id="orig-reg-${i}" onfocus="autoFillRegPrefix(${i}, 'orig')" onclick="autoFillRegPrefix(${i}, 'orig')" oninput="syncRow(${i}, 'reg', this.value)" onpaste="handleRegPaste(event, ${i})" onkeydown="handleEnterNav(event, ${i}, 'reg')"></td>
         <td><input type="text" inputmode="numeric" class="fig-input" id="orig-fig-${i}" oninput="syncRow(${i}, 'fig', this.value)" onkeydown="handleEnterNav(event, ${i}, 'fig')"></td>
         <td><input type="text" class="words-input" id="orig-words-${i}" readonly tabindex="-1"></td>
       `;
@@ -949,11 +949,76 @@
       mobRow.className = 'mobile-row';
       mobRow.innerHTML = `
         <span>${i}</span>
-        <input type="text" class="mob-reg" id="mob-reg-${i}" placeholder="Reg No" oninput="updateFromMobile(${i}, 'reg', this.value)">
-        <input type="text" inputmode="numeric" class="mob-mark" id="mob-fig-${i}" placeholder="Mark" oninput="updateFromMobile(${i}, 'fig', this.value)">
+        <input type="text" class="mob-reg" id="mob-reg-${i}" placeholder="Reg No" onfocus="autoFillRegPrefix(${i}, 'mob')" onclick="autoFillRegPrefix(${i}, 'mob')" oninput="updateFromMobile(${i}, 'reg', this.value)" onpaste="handleRegPaste(event, ${i})" onkeydown="handleMobileEnterNav(event, ${i}, 'reg')">
+        <input type="text" inputmode="numeric" class="mob-mark" id="mob-fig-${i}" placeholder="Mark" oninput="updateFromMobile(${i}, 'fig', this.value)" onkeydown="handleMobileEnterNav(event, ${i}, 'fig')">
         <div class="mob-words" id="mob-words-${i}"></div>
       `;
       mobList.appendChild(mobRow);
+    }
+  }
+
+  // Extract first 5 characters (e.g. VUAZA from VUAZAEC002 or VUBAB from VUBABCM001)
+  function extractCommonPrefix(regStr) {
+    if (!regStr) return "";
+    let clean = regStr.trim().toUpperCase();
+    if (clean.length < 5) return "";
+    return clean.substring(0, 5);
+  }
+
+  function autoFillRegPrefix(rowIdx, source) {
+    if (rowIdx <= 1) return;
+    let currOrig = document.getElementById(`orig-reg-${rowIdx}`);
+    let currMob = document.getElementById(`mob-reg-${rowIdx}`);
+    if (currOrig && currOrig.value.trim() !== "") return;
+
+    let prevVal = "";
+    for (let k = rowIdx - 1; k >= 1; k--) {
+      let p = document.getElementById(`orig-reg-${k}`).value.trim();
+      if (p.length >= 5) {
+        prevVal = p;
+        break;
+      }
+    }
+    if (!prevVal) return;
+
+    let prefix = extractCommonPrefix(prevVal);
+    if (!prefix) return;
+
+    document.getElementById(`orig-reg-${rowIdx}`).value = prefix;
+    document.getElementById(`dup-reg-${rowIdx}`).value = prefix;
+    if (currMob) currMob.value = prefix;
+
+    let activeEl = source === 'mob' ? currMob : currOrig;
+    if (activeEl) {
+      setTimeout(() => {
+        activeEl.setSelectionRange(prefix.length, prefix.length);
+      }, 15);
+    }
+  }
+
+  function handleMobileEnterNav(e, rowIdx, colType) {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIdx = rowIdx < numRows ? rowIdx + 1 : 1;
+      const nextEl = document.getElementById(`mob-${colType}-${nextIdx}`);
+      if (nextEl) nextEl.focus();
+    } else if (e.key === 'ArrowUp' && rowIdx > 1) {
+      e.preventDefault();
+      const prevEl = document.getElementById(`mob-${colType}-${rowIdx - 1}`);
+      if (prevEl) prevEl.focus();
+    }
+  }
+
+  function handleRegPaste(e, startRow) {
+    let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    if (!pastedText || (!pastedText.includes('\n') && !pastedText.includes('\t'))) return;
+    e.preventDefault();
+    let lines = pastedText.split(/\s+/).map(s => s.trim()).filter(s => s.length > 0);
+    let currentRow = startRow;
+    for (let item of lines) {
+      if (currentRow > numRows) break;
+      syncRow(currentRow, 'reg', item);
+      currentRow++;
     }
   }
 
