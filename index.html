@@ -548,6 +548,7 @@
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -585,8 +586,10 @@
     </div>
 
     <button id="btn-voice" class="voice-btn" onclick="toggleVoice()" title="Reads out entered marks aloud">🔊 Voice: ON</button>
+    <button onclick="triggerPdfUpload()" style="background: linear-gradient(135deg, #f59e0b, #d97706);" title="Upload a previously downloaded Mark Sheet PDF to edit it">📂 Edit Saved PDF</button>
     <button onclick="downloadPDF()">📥 Download PDF</button>
     <button class="clear-btn" onclick="clearAll()">🗑️ Clear</button>
+    <input type="file" id="pdfUploadInput" accept=".pdf,application/pdf" style="display:none" onchange="handlePdfUpload(event)">
   </div>
 </div>
 
@@ -595,7 +598,10 @@
 <!-- Mobile Easy Entry View -->
 <div id="mobileView" class="mobile-entry-container">
   <h3 style="margin-top:0; margin-bottom:4px; text-align:center; color:#1e293b;">📱 Mobile Easy Entry Mode</h3>
-  <p style="margin-top:0; margin-bottom:12px; text-align:center; font-size:11.5px; color:#64748b; font-weight:600;">💻 Designed & Developed by <a href="https://in.linkedin.com/in/javidkarathodi" target="_blank" rel="noopener noreferrer" style="color:#2563eb; font-weight:800; text-decoration:underline;">Javid Karathodi</a></p>
+  <p style="margin-top:0; margin-bottom:10px; text-align:center; font-size:11.5px; color:#64748b; font-weight:600;">💻 Designed & Developed by <a href="https://in.linkedin.com/in/javidkarathodi" target="_blank" rel="noopener noreferrer" style="color:#2563eb; font-weight:800; text-decoration:underline;">Javid Karathodi</a></p>
+  <div style="margin-bottom: 12px; text-align: center;">
+    <button onclick="triggerPdfUpload()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; width: 100%; box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);">📂 Edit Previously Downloaded PDF (Upload to Edit)</button>
+  </div>
   <div class="mobile-meta-grid">
     <div style="display:flex; gap:8px;">
       <select id="mob-sem-select" style="flex:1.5;" onchange="applyExamPreset(this.value)">
@@ -1255,6 +1261,17 @@
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Save exact form state in PDF metadata so uploading this PDF later restores 100% of fields cleanly!
+      const statePayload = collectMarkSheetState();
+      const encodedState = 'CU_MARKSHEET_DATA:' + btoa(unescape(encodeURIComponent(JSON.stringify(statePayload))));
+      pdf.setProperties({
+        title: `${qp} - University of Calicut Mark Sheet`,
+        subject: encodedState,
+        author: 'Javid Karathodi - Calicut Marksheet App',
+        keywords: encodedState
+      });
+
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
       pdf.save(filename);
     } catch (err) {
@@ -1264,6 +1281,165 @@
       document.body.removeChild(clone);
       if (wasMobile) switchView('mobile');
     }
+  }
+
+
+  // Collect all current form fields into a clean JSON object
+  function collectMarkSheetState() {
+    const rows = [];
+    for (let i = 1; i <= numRows; i++) {
+      rows.push({
+        reg: document.getElementById(`orig-reg-${i}`).value || '',
+        fig: document.getElementById(`orig-fig-${i}`).value || ''
+      });
+    }
+    return {
+      v: 1,
+      qp: document.getElementById('qp-orig').value || '',
+      sem: document.getElementById('sem-orig').value || 'Fifth Semester FYUG',
+      month: document.getElementById('exam-month-orig').value || 'November',
+      yr: document.getElementById('exam-yr-orig').value || '26',
+      course: document.getElementById('course-orig').value || '',
+      addl: document.getElementById('addl-orig').value || '',
+      chief: document.getElementById('chief-orig').value || '',
+      chair: document.getElementById('chair-orig').value || '',
+      date: document.getElementById('date-orig').value || '',
+      session: document.getElementById('session-orig').value || 'AN',
+      rows: rows
+    };
+  }
+
+  // Restore all fields from parsed data (without speaking every number aloud during import)
+  function applyMarkSheetState(data) {
+    if (!data) return;
+    const prevVoice = voiceEnabled;
+    voiceEnabled = false; // Temporarily silence speech while loading rows
+
+    try {
+      initTables();
+
+      if (data.sem !== undefined) applyExamPreset(data.sem);
+      if (data.yr !== undefined) applyYear(data.yr);
+      if (data.month !== undefined) syncMeta('examMonth', data.month);
+      if (data.qp !== undefined) syncMeta('qp', data.qp);
+      if (data.course !== undefined) syncMeta('course', data.course);
+      if (data.addl !== undefined) syncMeta('addl', data.addl);
+      if (data.chief !== undefined) syncMeta('chief', data.chief);
+      if (data.chair !== undefined) syncMeta('chair', data.chair);
+      if (data.date !== undefined) syncMeta('date', data.date);
+      if (data.session !== undefined) syncMeta('session', data.session);
+
+      if (Array.isArray(data.rows)) {
+        data.rows.forEach((r, idx) => {
+          const rowNum = idx + 1;
+          if (rowNum <= numRows) {
+            if (r.reg) syncRow(rowNum, 'reg', r.reg);
+            if (r.fig !== undefined && r.fig !== '') syncRow(rowNum, 'fig', String(r.fig));
+          }
+        });
+      }
+      fitAllHeaders();
+    } finally {
+      voiceEnabled = prevVoice;
+    }
+  }
+
+  function triggerPdfUpload() {
+    const inp = document.getElementById('pdfUploadInput');
+    inp.value = '';
+    inp.click();
+  }
+
+  async function handlePdfUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8 = new Uint8Array(arrayBuffer);
+
+      // Method 1: Check for embedded CU_MARKSHEET_DATA payload inside the PDF file bytes
+      const rawLatin = new TextDecoder('latin1').decode(uint8);
+      const marker = 'CU_MARKSHEET_DATA:';
+      const markerIdx = rawLatin.indexOf(marker);
+      if (markerIdx !== -1) {
+        const afterMarker = rawLatin.slice(markerIdx + marker.length);
+        const b64Match = afterMarker.match(/^([A-Za-z0-9+/=]+)/);
+        if (b64Match && b64Match[1]) {
+          try {
+            const jsonStr = decodeURIComponent(escape(atob(b64Match[1])));
+            const parsed = JSON.parse(jsonStr);
+            applyMarkSheetState(parsed);
+            alert('✅ Mark sheet loaded! You can now edit any Register Number, Mark, or Examiner detail and download the updated PDF.');
+            return;
+          } catch (e) {
+            console.warn('Embedded metadata parse failed, falling back to PDF text extraction:', e);
+          }
+        }
+      }
+
+      // Method 2: Fallback using pdf.js for PDFs that have selectable text or older exports
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdfDoc = await pdfjsLib.getDocument({ data: uint8 }).promise;
+        const meta = await pdfDoc.getMetadata().catch(() => null);
+        const subj = (meta && meta.info && (meta.info.Subject || meta.info.Keywords)) || '';
+        if (subj.includes(marker)) {
+          const b64 = subj.split(marker)[1].trim();
+          const jsonStr = decodeURIComponent(escape(atob(b64)));
+          const parsed = JSON.parse(jsonStr);
+          applyMarkSheetState(parsed);
+          alert('✅ Mark sheet loaded! You can now edit any details and download the updated PDF.');
+          return;
+        }
+
+        const page = await pdfDoc.getPage(1);
+        const textContent = await page.getTextContent();
+        const items = textContent.items.map(it => it.str.trim()).filter(Boolean);
+        const fullText = items.join(' ');
+
+        if (fullText.length > 20) {
+          const parsedFallback = parseTextFromPdf(fullText);
+          if (parsedFallback.rows.length > 0 || parsedFallback.qp || parsedFallback.course) {
+            applyMarkSheetState(parsedFallback);
+            alert('✅ Mark sheet data extracted! Please double-check all fields before downloading.');
+            return;
+          }
+        }
+      }
+
+      alert('⚠️ Could not extract editable text from this PDF (it may be an older image-only PDF). Please enter the details once, and any PDF downloaded from now on can be re-uploaded and edited anytime!');
+    } catch (err) {
+      console.error(err);
+      alert('❌ Error reading PDF file. Please try again.');
+    }
+  }
+
+  function parseTextFromPdf(fullText) {
+    const qpMatch = fullText.match(/QP\s*CODE\s*:\s*([A-Z0-9]+)/i);
+    const courseMatch = fullText.match(/Course\s+(.+?)\s+Register\s+Number/i);
+    const dateMatch = fullText.match(/Date\s*:\s*(\d{2}[-\/]\d{2}[-\/]\d{4})/i);
+    const sessMatch = fullText.match(/SESSION\s*:\s*(FN|AN)/i);
+    const semMatch = fullText.match(/((?:First|Third|Fifth|Seventh)\s+Semester\s+FYUG)/i);
+
+    const regRegex = /\b([A-Z]{4,6}\d{2,4})\b\s+(\d{1,3})\b/g;
+    const rows = [];
+    const seen = new Set();
+    let m;
+    while ((m = regRegex.exec(fullText)) !== null) {
+      if (!seen.has(m[1])) {
+        seen.add(m[1]);
+        rows.push({ reg: m[1], fig: m[2] });
+      }
+    }
+    return {
+      qp: qpMatch ? qpMatch[1] : '',
+      course: courseMatch ? courseMatch[1].trim() : '',
+      date: dateMatch ? dateMatch[1] : '',
+      session: sessMatch ? sessMatch[1].toUpperCase() : 'AN',
+      sem: semMatch ? semMatch[1] : 'Fifth Semester FYUG',
+      rows: rows
+    };
   }
 
   window.onload = function() {
